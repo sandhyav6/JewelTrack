@@ -184,12 +184,6 @@ This project was developed to simulate a **real-world jewellery store management
 
 ---
 
-## 👩‍💻 Author
-
-Developed as part of a B.Tech Computer Science project.
-
----
-
 ## ⭐ Final Note
 
 This project combines **functional depth** with **premium visual design**, making it suitable for:
