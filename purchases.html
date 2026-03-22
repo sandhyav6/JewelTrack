@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchases — JewelTrack</title>
+  <meta name="description" content="Track purchases from suppliers in JewelTrack">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fa-solid fa-gem"></i></div>
+        <div class="sidebar-brand">JewelTrack<small>Management System</small></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+        <a href="customers.html" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
+        <a href="items.html" class="nav-item"><i class="fa-solid fa-gem"></i> Jewellery Items</a>
+        <a href="suppliers.html" class="nav-item"><i class="fa-solid fa-truck-field"></i> Suppliers</a>
+        <div class="nav-section-label">Transactions</div>
+        <a href="billing.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Billing / Sales</a>
+        <a href="purchases.html" class="nav-item active"><i class="fa-solid fa-cart-shopping"></i> Purchases</a>
+        <div class="nav-section-label">Operations</div>
+        <a href="inventory.html" class="nav-item"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+        <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </aside>
+    <div class="sidebar-overlay"></div>
+
+    <div class="main-container">
+      <header class="navbar">
+        <div class="navbar-left">
+          <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-section">
+            <h2>Purchases</h2>
+            <div class="breadcrumb"><a href="dashboard.html">Home</a><span class="separator">/</span><span>Purchases</span></div>
+          </div>
+        </div>
+        <div class="navbar-right">
+          <div class="navbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search anything..."></div>
+          <span class="navbar-date" id="navDate"></span>
+          <button class="navbar-icon-btn"><i class="fa-solid fa-bell"></i><span class="notification-badge"></span></button>
+          <div class="navbar-profile">
+            <div class="profile-avatar">SV</div>
+            <div class="profile-info"><span class="name">Sandhya V.</span><span class="role">Admin</span></div>
+            <div class="profile-dropdown">
+              <a href="settings.html"><i class="fa-solid fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+              <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h1>Purchase Orders</h1>
+            <p>Track incoming stock purchases from suppliers</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn btn-primary" onclick="openAddPurchase()"><i class="fa-solid fa-plus"></i> New Purchase</button>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-4 section">
+          <div class="stat-card gold animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">Total Purchases</div>
+              <div class="stat-value">284</div>
+            </div>
+          </div>
+          <div class="stat-card success animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">Total Spent</div>
+              <div class="stat-value">₹84.6L</div>
+            </div>
+          </div>
+          <div class="stat-card info animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-truck-field"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">Suppliers Used</div>
+              <div class="stat-value">8</div>
+            </div>
+          </div>
+          <div class="stat-card burgundy animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">This Month</div>
+              <div class="stat-value">₹12.4L</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Purchases Table -->
+        <div class="table-container animate-in">
+          <div class="table-header">
+            <h3>Purchase History</h3>
+            <div class="table-actions">
+              <div class="table-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search purchases..." id="purchaseSearch" oninput="searchPurchases()">
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Purchase ID</th>
+                  <th>Supplier</th>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th>Cost Price</th>
+                  <th>Total Cost</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="purchaseTableBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="purchaseInfo">Showing 0 purchases</span>
+            <div class="pagination"></div>
+          </div>
+        </div>
+
+        <!-- Bottom Panels -->
+        <div class="grid grid-2 section" style="margin-top:24px;">
+          <div class="card animate-in">
+            <div class="card-header"><h3>Recent Purchases</h3></div>
+            <div class="timeline" id="recentPurchasesTimeline"></div>
+          </div>
+          <div class="card animate-in">
+            <div class="card-header"><h3>Top Suppliers</h3></div>
+            <div id="topSuppliersPanel"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add Purchase Modal -->
+  <div class="modal-overlay" id="addPurchaseModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Record New Purchase</h3>
+        <button class="modal-close" onclick="closeModal('addPurchaseModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="purchaseForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="purSupplier">Supplier *</label>
+              <select id="purSupplier" class="form-control">
+                <option value="">Select supplier</option>
+                <option value="Kalyan Suppliers">Kalyan Suppliers</option>
+                <option value="Tanishq Wholesale">Tanishq Wholesale</option>
+                <option value="Malabar Traders">Malabar Traders</option>
+                <option value="Senco Gold Supply">Senco Gold Supply</option>
+                <option value="PC Jeweller Dist.">PC Jeweller Dist.</option>
+                <option value="Joyalukkas Gems">Joyalukkas Gems</option>
+                <option value="GRT Diamonds">GRT Diamonds</option>
+              </select>
+              <span class="form-error">Supplier is required</span>
+            </div>
+            <div class="form-group">
+              <label for="purItem">Item *</label>
+              <input type="text" id="purItem" class="form-control" placeholder="e.g. Gold Chain 22K">
+              <span class="form-error">Item is required</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="purDate">Purchase Date</label>
+              <input type="date" id="purDate" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="purQty">Quantity *</label>
+              <input type="number" id="purQty" class="form-control" placeholder="e.g. 10" min="1">
+              <span class="form-error">Quantity is required</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="purCost">Cost Price (₹) *</label>
+              <input type="number" id="purCost" class="form-control" placeholder="e.g. 45000">
+              <span class="form-error">Cost price is required</span>
+            </div>
+            <div class="form-group">
+              <label>Total Cost</label>
+              <input type="text" class="form-control" id="purTotal" readonly placeholder="Auto-calculated">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="purNotes">Notes</label>
+            <textarea id="purNotes" class="form-control" placeholder="Additional notes..." rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('addPurchaseModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePurchase()">Save Purchase</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+  <script src="js/main.js"></script>
+  <script src="js/purchases.js"></script>
+</body>
+</html>
