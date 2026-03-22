@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billing & Sales — JewelTrack</title>
+  <meta name="description" content="Create bills and invoices in JewelTrack">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fa-solid fa-gem"></i></div>
+        <div class="sidebar-brand">JewelTrack<small>Management System</small></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+        <a href="customers.html" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
+        <a href="items.html" class="nav-item"><i class="fa-solid fa-gem"></i> Jewellery Items</a>
+        <a href="suppliers.html" class="nav-item"><i class="fa-solid fa-truck-field"></i> Suppliers</a>
+        <div class="nav-section-label">Transactions</div>
+        <a href="billing.html" class="nav-item active"><i class="fa-solid fa-file-invoice-dollar"></i> Billing / Sales</a>
+        <a href="purchases.html" class="nav-item"><i class="fa-solid fa-cart-shopping"></i> Purchases</a>
+        <div class="nav-section-label">Operations</div>
+        <a href="inventory.html" class="nav-item"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+        <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </aside>
+    <div class="sidebar-overlay"></div>
+
+    <div class="main-container">
+      <header class="navbar">
+        <div class="navbar-left">
+          <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-section">
+            <h2>Billing & Sales</h2>
+            <div class="breadcrumb"><a href="dashboard.html">Home</a><span class="separator">/</span><span>Billing</span></div>
+          </div>
+        </div>
+        <div class="navbar-right">
+          <div class="navbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search anything..."></div>
+          <span class="navbar-date" id="navDate"></span>
+          <button class="navbar-icon-btn"><i class="fa-solid fa-bell"></i><span class="notification-badge"></span></button>
+          <div class="navbar-profile">
+            <div class="profile-avatar">SV</div>
+            <div class="profile-info"><span class="name">Sandhya V.</span><span class="role">Admin</span></div>
+            <div class="profile-dropdown">
+              <a href="settings.html"><i class="fa-solid fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+              <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h1>Create Bill</h1>
+            <p>Generate invoices for jewellery sales</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn btn-ghost" onclick="clearBill()"><i class="fa-solid fa-rotate-left"></i> Clear All</button>
+          </div>
+        </div>
+
+        <!-- Two-Column Billing Layout -->
+        <div class="grid billing-layout animate-in" style="grid-template-columns: 1fr 420px; align-items: start;">
+
+          <!-- Left: Billing Form -->
+          <div>
+            <div class="card mb-lg">
+              <h4 style="margin-bottom:20px;">Bill Information</h4>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="billNumber">Bill Number</label>
+                  <input type="text" id="billNumber" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                  <label for="billDate">Bill Date</label>
+                  <input type="date" id="billDate" class="form-control">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="billCustomer">Select Customer *</label>
+                  <select id="billCustomer" class="form-control">
+                    <option value="">Choose a customer</option>
+                    <option value="Priya Sharma">Priya Sharma</option>
+                    <option value="Vikram Singh">Vikram Singh</option>
+                    <option value="Anjali Gupta">Anjali Gupta</option>
+                    <option value="Rajesh Patel">Rajesh Patel</option>
+                    <option value="Meera Iyer">Meera Iyer</option>
+                    <option value="Neha Kapoor">Neha Kapoor</option>
+                    <option value="Deepak Joshi">Deepak Joshi</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="billEmployee">Sales Employee</label>
+                  <select id="billEmployee" class="form-control">
+                    <option value="Sandhya V.">Sandhya V.</option>
+                    <option value="Rahul M.">Rahul M.</option>
+                    <option value="Anita D.">Anita D.</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Item Section -->
+            <div class="card mb-lg">
+              <h4 style="margin-bottom:20px;">Add Items</h4>
+              <div class="form-row" style="grid-template-columns: 2fr 1fr auto;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="billItem">Select Item</label>
+                  <select id="billItem" class="form-control">
+                    <option value="">Choose an item</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label for="billQty">Qty</label>
+                  <input type="number" id="billQty" class="form-control" value="1" min="1">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label>&nbsp;</label>
+                  <button class="btn btn-primary" onclick="addBillItem()" style="height:46px;"><i class="fa-solid fa-plus"></i> Add</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bill Items Table -->
+            <div class="table-container mb-lg">
+              <div class="table-header">
+                <h3>Bill Items</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Qty</th>
+                      <th>Unit Price</th>
+                      <th>Total</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="billItemsBody">
+                    <tr id="emptyBillRow"><td colspan="5"><div class="empty-state" style="padding:24px;"><i class="fa-solid fa-cart-shopping" style="font-size:24px;color:var(--text-muted);margin-bottom:8px;"></i><p style="margin:0;">No items added yet. Select an item above.</p></div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Payment & Totals -->
+            <div class="card">
+              <div class="form-row" style="align-items:end;">
+                <div class="form-group">
+                  <label for="billPayment">Payment Mode</label>
+                  <select id="billPayment" class="form-control">
+                    <option value="Cash">Cash</option>
+                    <option value="Card">Card</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Net Banking">Net Banking</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="billDiscount">Discount (%)</label>
+                  <input type="number" id="billDiscount" class="form-control" value="0" min="0" max="100" oninput="updateTotals()">
+                </div>
+              </div>
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                <div class="invoice-total-row"><span>Subtotal</span><span id="billSubtotal">₹0</span></div>
+                <div class="invoice-total-row"><span>GST (3%)</span><span id="billTax">₹0</span></div>
+                <div class="invoice-total-row"><span>Discount</span><span id="billDiscountAmt">-₹0</span></div>
+                <div class="invoice-total-row grand-total"><span>Grand Total</span><span id="billGrandTotal">₹0</span></div>
+              </div>
+              <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+                <button class="btn btn-primary btn-lg" onclick="generateBill()" style="flex:1;"><i class="fa-solid fa-check"></i> Generate Bill</button>
+                <button class="btn btn-outline" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
+                <button class="btn btn-outline-gold"><i class="fa-solid fa-download"></i> PDF</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Live Invoice Preview -->
+          <div class="invoice-card" style="position:sticky;top:92px;">
+            <div class="invoice-header">
+              <div style="font-size:14px;letter-spacing:2px;text-transform:uppercase;opacity:0.7;margin-bottom:4px;">Invoice</div>
+              <h3>JewelTrack</h3>
+              <p>Premium Jewellery Store</p>
+            </div>
+            <div class="invoice-body">
+              <div class="invoice-meta">
+                <div class="meta-item"><label>Bill No.</label><span id="previewBillNo">-</span></div>
+                <div class="meta-item"><label>Date</label><span id="previewDate">-</span></div>
+                <div class="meta-item"><label>Customer</label><span id="previewCustomer">-</span></div>
+                <div class="meta-item"><label>Employee</label><span id="previewEmployee">-</span></div>
+              </div>
+
+              <table class="data-table" style="font-size:13px;">
+                <thead>
+                  <tr>
+                    <th style="padding:8px 12px;">Item</th>
+                    <th style="padding:8px 12px;">Qty</th>
+                    <th style="padding:8px 12px;">Price</th>
+                    <th style="padding:8px 12px;">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="previewItems">
+                  <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px;font-size:13px;">No items</td></tr>
+                </tbody>
+              </table>
+
+              <div class="invoice-totals">
+                <div class="invoice-total-row"><span>Subtotal</span><span id="previewSubtotal">₹0</span></div>
+                <div class="invoice-total-row"><span>GST (3%)</span><span id="previewTax">₹0</span></div>
+                <div class="invoice-total-row"><span>Discount</span><span id="previewDiscount">-₹0</span></div>
+                <div class="invoice-total-row grand-total"><span>Grand Total</span><span id="previewTotal">₹0</span></div>
+              </div>
+
+              <div style="margin-top:16px;padding-top:12px;border-top:1px dashed var(--border);text-align:center;">
+                <div style="font-size:12px;color:var(--text-muted);">Payment: <strong id="previewPayment">Cash</strong></div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Thank you for your purchase!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+  <script src="js/main.js"></script>
+  <script src="js/billing.js"></script>
+</body>
+</html>
