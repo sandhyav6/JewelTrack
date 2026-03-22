@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jewellery Items — JewelTrack</title>
+  <meta name="description" content="Manage jewellery inventory items in JewelTrack">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    /* Items page card view */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .item-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: all var(--transition-base);
+    }
+
+    .item-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .item-card-image {
+      height: 180px;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .item-card-image i {
+      font-size: 48px;
+      color: var(--border);
+    }
+
+    .item-card-image .stock-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+
+    .item-card-body {
+      padding: 18px;
+    }
+
+    .item-card-body h4 {
+      font-size: 16px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-card-body .item-id {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .item-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .item-card-meta .meta-item {
+      font-size: 12px;
+    }
+
+    .item-card-meta .meta-item label {
+      color: var(--text-muted);
+      display: block;
+      font-size: 11px;
+      margin-bottom: 1px;
+    }
+
+    .item-card-meta .meta-item span {
+      color: var(--text-dark);
+      font-weight: 500;
+    }
+
+    .item-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .item-card-price {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fa-solid fa-gem"></i></div>
+        <div class="sidebar-brand">JewelTrack<small>Management System</small></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+        <a href="customers.html" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
+        <a href="items.html" class="nav-item active"><i class="fa-solid fa-gem"></i> Jewellery Items</a>
+        <a href="suppliers.html" class="nav-item"><i class="fa-solid fa-truck-field"></i> Suppliers</a>
+        <div class="nav-section-label">Transactions</div>
+        <a href="billing.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Billing / Sales</a>
+        <a href="purchases.html" class="nav-item"><i class="fa-solid fa-cart-shopping"></i> Purchases</a>
+        <div class="nav-section-label">Operations</div>
+        <a href="inventory.html" class="nav-item"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+        <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </aside>
+    <div class="sidebar-overlay"></div>
+
+    <div class="main-container">
+      <header class="navbar">
+        <div class="navbar-left">
+          <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-section">
+            <h2>Jewellery Items</h2>
+            <div class="breadcrumb"><a href="dashboard.html">Home</a><span class="separator">/</span><span>Jewellery Items</span></div>
+          </div>
+        </div>
+        <div class="navbar-right">
+          <div class="navbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search anything..."></div>
+          <span class="navbar-date" id="navDate"></span>
+          <button class="navbar-icon-btn"><i class="fa-solid fa-bell"></i><span class="notification-badge"></span></button>
+          <div class="navbar-profile">
+            <div class="profile-avatar">SV</div>
+            <div class="profile-info"><span class="name">Sandhya V.</span><span class="role">Admin</span></div>
+            <div class="profile-dropdown">
+              <a href="settings.html"><i class="fa-solid fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+              <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h1>Jewellery Collection</h1>
+            <p>Manage your inventory of precious jewellery items</p>
+          </div>
+          <div class="page-header-actions">
+            <div class="view-toggle" id="viewToggle">
+              <button class="active" onclick="setView('card')" title="Card View"><i class="fa-solid fa-grid-2"></i></button>
+              <button onclick="setView('table')" title="Table View"><i class="fa-solid fa-list"></i></button>
+            </div>
+            <button class="btn btn-primary" onclick="openAddItem()"><i class="fa-solid fa-plus"></i> Add Item</button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar animate-in">
+          <div class="filter-group">
+            <div class="table-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search items..." id="itemSearch" oninput="filterItems()">
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Category:</label>
+            <select id="filterCategory" class="form-control" style="height:38px;width:auto;min-width:140px;" onchange="filterItems()">
+              <option value="all">All Categories</option>
+              <option value="Necklace">Necklace</option>
+              <option value="Ring">Ring</option>
+              <option value="Bangle">Bangle</option>
+              <option value="Earring">Earring</option>
+              <option value="Pendant">Pendant</option>
+              <option value="Chain">Chain</option>
+              <option value="Bridal Set">Bridal Set</option>
+              <option value="Anklet">Anklet</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Material:</label>
+            <select id="filterMaterial" class="form-control" style="height:38px;width:auto;min-width:130px;" onchange="filterItems()">
+              <option value="all">All Materials</option>
+              <option value="Gold">Gold</option>
+              <option value="Diamond">Diamond</option>
+              <option value="Silver">Silver</option>
+              <option value="Platinum">Platinum</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Stock:</label>
+            <select id="filterStock" class="form-control" style="height:38px;width:auto;min-width:130px;" onchange="filterItems()">
+              <option value="all">All</option>
+              <option value="In Stock">In Stock</option>
+              <option value="Low Stock">Low Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Card View -->
+        <div id="cardView" class="items-grid section"></div>
+
+        <!-- Table View -->
+        <div id="tableView" class="table-container section" style="display:none;">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Item ID</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Material</th>
+                  <th>Weight</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Supplier</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="itemsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add/Edit Item Modal -->
+  <div class="modal-overlay" id="addItemModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 id="itemModalTitle">Add New Item</h3>
+        <button class="modal-close" onclick="closeModal('addItemModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="itemForm">
+          <input type="hidden" id="editItemId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="itemName">Item Name *</label>
+              <input type="text" id="itemName" class="form-control" placeholder="e.g. Gold Necklace 22K">
+              <span class="form-error">Item name is required</span>
+            </div>
+            <div class="form-group">
+              <label for="itemCategory">Category *</label>
+              <select id="itemCategory" class="form-control">
+                <option value="">Select category</option>
+                <option value="Necklace">Necklace</option>
+                <option value="Ring">Ring</option>
+                <option value="Bangle">Bangle</option>
+                <option value="Earring">Earring</option>
+                <option value="Pendant">Pendant</option>
+                <option value="Chain">Chain</option>
+                <option value="Bridal Set">Bridal Set</option>
+                <option value="Anklet">Anklet</option>
+              </select>
+              <span class="form-error">Category is required</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="itemMaterial">Material *</label>
+              <select id="itemMaterial" class="form-control">
+                <option value="">Select material</option>
+                <option value="Gold">Gold (22K)</option>
+                <option value="Gold">Gold (18K)</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Silver">Silver (925)</option>
+                <option value="Platinum">Platinum</option>
+              </select>
+              <span class="form-error">Material is required</span>
+            </div>
+            <div class="form-group">
+              <label for="itemWeight">Weight (grams)</label>
+              <input type="number" id="itemWeight" class="form-control" placeholder="e.g. 15.5" step="0.1">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="itemPrice">Price (₹) *</label>
+              <input type="number" id="itemPrice" class="form-control" placeholder="e.g. 85000">
+              <span class="form-error">Price is required</span>
+            </div>
+            <div class="form-group">
+              <label for="itemStock">Stock Quantity *</label>
+              <input type="number" id="itemStock" class="form-control" placeholder="e.g. 12">
+              <span class="form-error">Stock quantity is required</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="itemSupplier">Supplier</label>
+              <select id="itemSupplier" class="form-control">
+                <option value="">Select supplier</option>
+                <option value="Kalyan Suppliers">Kalyan Suppliers</option>
+                <option value="Tanishq Wholesale">Tanishq Wholesale</option>
+                <option value="Malabar Traders">Malabar Traders</option>
+                <option value="Senco Gold Supply">Senco Gold Supply</option>
+                <option value="PC Jeweller Dist.">PC Jeweller Dist.</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Image (placeholder)</label>
+              <div style="height:46px;border:2px dashed var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:13px;cursor:pointer;">
+                <i class="fa-solid fa-cloud-arrow-up" style="margin-right:8px;"></i> Upload Image
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="itemDesc">Description</label>
+            <textarea id="itemDesc" class="form-control" placeholder="Item description..." rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('addItemModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Item Modal -->
+  <div class="modal-overlay" id="viewItemModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>Item Details</h3>
+        <button class="modal-close" onclick="closeModal('viewItemModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="viewItemBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+  <script src="js/main.js"></script>
+  <script src="js/items.js"></script>
+</body>
+</html>
