@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — JewelTrack Management System</title>
+  <meta name="description" content="Login to JewelTrack — Premium Jewellery Store Management System">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    /* === Login Page Specific Styles === */
+    body.login-body {
+      background: var(--bg-primary);
+      min-height: 100vh;
+    }
+
+    .login-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+
+    /* --- Left Branding Panel --- */
+    .login-branding {
+      background: linear-gradient(135deg, #5A1A32 0%, var(--burgundy) 30%, #4A1530 70%, #3D0F28 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    /* Decorative background pattern */
+    .login-branding::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(201, 162, 39, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(201, 162, 39, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(201, 162, 39, 0.03) 0%, transparent 70%);
+    }
+
+    /* Decorative diamond shapes */
+    .login-branding::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L40 30 L30 55 L20 30 Z' fill='none' stroke='rgba(201,162,39,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+      background-size: 80px 80px;
+      opacity: 0.5;
+    }
+
+    .branding-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .branding-emblem {
+      width: 90px;
+      height: 90px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      box-shadow: 0 8px 32px rgba(201, 162, 39, 0.35);
+    }
+
+    .branding-emblem i {
+      font-size: 38px;
+      color: var(--burgundy);
+    }
+
+    .branding-content h1 {
+      color: #FFFFFF;
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .branding-tagline {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 16px;
+      font-style: italic;
+      font-family: var(--font-heading);
+      max-width: 380px;
+      line-height: 1.6;
+      margin: 0 auto;
+    }
+
+    .branding-divider {
+      width: 60px;
+      height: 2px;
+      background: var(--gold);
+      margin: 28px auto;
+      border-radius: 2px;
+    }
+
+    .branding-features {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .branding-features .feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 14px;
+    }
+
+    .branding-features .feature i {
+      color: var(--gold);
+      font-size: 14px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* --- Right Login Form Panel --- */
+    .login-form-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      background: var(--bg-secondary);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-medium);
+      border: 1px solid var(--border);
+      padding: 40px 36px;
+    }
+
+    .login-card .mobile-logo {
+      display: none;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .login-card .mobile-logo i {
+      font-size: 32px;
+      color: var(--gold);
+    }
+
+    .login-card .mobile-logo h3 {
+      font-size: 18px;
+      margin-top: 8px;
+    }
+
+    .login-card h2 {
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .login-card .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .login-card .form-group {
+      margin-bottom: 22px;
+    }
+
+    .login-card .form-control {
+      height: 50px;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+
+    .password-toggle:hover {
+      color: var(--text-dark);
+    }
+
+    .login-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .login-options .forgot-link {
+      font-size: 13px;
+      color: var(--burgundy);
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+
+    .login-options .forgot-link:hover {
+      color: var(--gold);
+    }
+
+    .login-btn {
+      width: 100%;
+      height: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .login-branding {
+        padding: 40px 32px;
+      }
+      .branding-content h1 {
+        font-size: 28px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .login-split {
+        grid-template-columns: 1fr;
+      }
+      .login-branding {
+        display: none;
+      }
+      .login-card .mobile-logo {
+        display: block;
+      }
+      .login-form-panel {
+        padding: 24px;
+      }
+      .login-card {
+        padding: 32px 24px;
+      }
+    }
+  </style>
+</head>
+<body class="login-body">
+
+  <div class="login-split">
+    <!-- Left: Branding -->
+    <div class="login-branding">
+      <div class="branding-content">
+        <div class="branding-emblem">
+          <i class="fa-solid fa-gem"></i>
+        </div>
+        <h1>JewelTrack<br>Management System</h1>
+        <div class="branding-divider"></div>
+        <p class="branding-tagline">
+          "Precision, Elegance, and Inventory<br>in Perfect Balance."
+        </p>
+        <div class="branding-features">
+          <div class="feature"><i class="fa-solid fa-check"></i> Complete Inventory Management</div>
+          <div class="feature"><i class="fa-solid fa-check"></i> Real-time Sales & Billing</div>
+          <div class="feature"><i class="fa-solid fa-check"></i> Supplier Relationship Tracking</div>
+          <div class="feature"><i class="fa-solid fa-check"></i> Comprehensive Business Reports</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Login Form -->
+    <div class="login-form-panel">
+      <div class="login-card">
+        <div class="mobile-logo">
+          <i class="fa-solid fa-gem"></i>
+          <h3>JewelTrack</h3>
+        </div>
+
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to your dashboard</p>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <div class="input-group">
+              <input type="email" id="loginEmail" class="form-control" placeholder="admin@jeweltrack.com" value="admin@jeweltrack.com">
+              <i class="fa-solid fa-envelope input-icon" style="pointer-events:none"></i>
+            </div>
+            <span class="form-error">Please enter a valid email address</span>
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <div class="input-group">
+              <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" value="admin123">
+              <button type="button" class="password-toggle" onclick="togglePassword()">
+                <i class="fa-solid fa-eye" id="passwordIcon"></i>
+              </button>
+            </div>
+            <span class="form-error">Password is required</span>
+          </div>
+
+          <div class="form-group">
+            <label for="loginRole">Sign in as</label>
+            <select id="loginRole" class="form-control">
+              <option value="admin">Admin</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+
+          <div class="login-options">
+            <div class="checkbox-group">
+              <input type="checkbox" id="rememberMe" checked>
+              <label for="rememberMe">Remember me</label>
+            </div>
+            <a href="#" class="forgot-link">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary login-btn" id="loginBtn">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            Sign In
+          </button>
+        </form>
+
+        <div class="login-footer">
+          &copy; 2026 JewelTrack — Premium Management System
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Toggle password visibility
+    function togglePassword() {
+      const input = document.getElementById('loginPassword');
+      const icon = document.getElementById('passwordIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+      }
+    }
+
+    // Handle login
+    function handleLogin(e) {
+      e.preventDefault();
+      let valid = true;
+
+      const email = document.getElementById('loginEmail');
+      const password = document.getElementById('loginPassword');
+
+      if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+        email.closest('.form-group').classList.add('has-error');
+        valid = false;
+      } else {
+        email.closest('.form-group').classList.remove('has-error');
+      }
+
+      if (!password.value.trim()) {
+        password.closest('.form-group').classList.add('has-error');
+        valid = false;
+      } else {
+        password.closest('.form-group').classList.remove('has-error');
+      }
+
+      if (!valid) return;
+
+      // Simulate login
+      const btn = document.getElementById('loginBtn');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing In...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        localStorage.setItem('jms-user', JSON.stringify({
+          name: 'Sandhya V.',
+          role: document.getElementById('loginRole').value,
+          email: email.value
+        }));
+        window.location.href = 'dashboard.html';
+      }, 1200);
+    }
+  </script>
+</body>
+</html>
