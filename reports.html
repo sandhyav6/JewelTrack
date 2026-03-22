@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports — JewelTrack</title>
+  <meta name="description" content="Business reports and analytics in JewelTrack">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fa-solid fa-gem"></i></div>
+        <div class="sidebar-brand">JewelTrack<small>Management System</small></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+        <a href="customers.html" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
+        <a href="items.html" class="nav-item"><i class="fa-solid fa-gem"></i> Jewellery Items</a>
+        <a href="suppliers.html" class="nav-item"><i class="fa-solid fa-truck-field"></i> Suppliers</a>
+        <div class="nav-section-label">Transactions</div>
+        <a href="billing.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Billing / Sales</a>
+        <a href="purchases.html" class="nav-item"><i class="fa-solid fa-cart-shopping"></i> Purchases</a>
+        <div class="nav-section-label">Operations</div>
+        <a href="inventory.html" class="nav-item"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+        <a href="reports.html" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </aside>
+    <div class="sidebar-overlay"></div>
+
+    <div class="main-container">
+      <header class="navbar">
+        <div class="navbar-left">
+          <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-section">
+            <h2>Reports</h2>
+            <div class="breadcrumb"><a href="dashboard.html">Home</a><span class="separator">/</span><span>Reports</span></div>
+          </div>
+        </div>
+        <div class="navbar-right">
+          <div class="navbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search anything..."></div>
+          <span class="navbar-date" id="navDate"></span>
+          <button class="navbar-icon-btn"><i class="fa-solid fa-bell"></i><span class="notification-badge"></span></button>
+          <div class="navbar-profile">
+            <div class="profile-avatar">SV</div>
+            <div class="profile-info"><span class="name">Sandhya V.</span><span class="role">Admin</span></div>
+            <div class="profile-dropdown">
+              <a href="settings.html"><i class="fa-solid fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+              <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h1>Business Reports</h1>
+            <p>Analyze your jewellery business performance</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn btn-outline" onclick="showToast('info','Export','CSV export initiated.')"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+            <button class="btn btn-outline-gold" onclick="window.print()"><i class="fa-solid fa-print"></i> Print Report</button>
+            <button class="btn btn-primary" onclick="showToast('info','PDF','PDF download started.')"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+          </div>
+        </div>
+
+        <!-- Report Controls -->
+        <div class="card mb-lg animate-in">
+          <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:end;">
+            <div class="form-group" style="margin-bottom:0;flex:1;min-width:180px;">
+              <label for="reportFrom">Date From</label>
+              <input type="date" id="reportFrom" class="form-control" value="2026-03-01">
+            </div>
+            <div class="form-group" style="margin-bottom:0;flex:1;min-width:180px;">
+              <label for="reportTo">Date To</label>
+              <input type="date" id="reportTo" class="form-control" value="2026-03-22">
+            </div>
+            <div class="form-group" style="margin-bottom:0;flex:1;min-width:180px;">
+              <label for="reportType">Report Type</label>
+              <select id="reportType" class="form-control">
+                <option value="sales">Sales Report</option>
+                <option value="inventory">Inventory Report</option>
+                <option value="supplier">Supplier Report</option>
+                <option value="customer">Customer Report</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="generateReport()" style="height:46px;"><i class="fa-solid fa-chart-bar"></i> Generate</button>
+          </div>
+        </div>
+
+        <!-- Report Summary Cards -->
+        <div class="grid grid-4 section">
+          <div class="stat-card gold animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">Total Sales</div>
+              <div class="stat-value">₹42.5L</div>
+            </div>
+          </div>
+          <div class="stat-card burgundy animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-file-invoice"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">Total Bills</div>
+              <div class="stat-value">187</div>
+            </div>
+          </div>
+          <div class="stat-card success animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-crown"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">Best Category</div>
+              <div class="stat-value" style="font-size:20px;">Gold</div>
+            </div>
+          </div>
+          <div class="stat-card info animate-in">
+            <div class="stat-icon"><i class="fa-solid fa-truck-field"></i></div>
+            <div class="stat-info">
+              <div class="stat-label">Top Supplier</div>
+              <div class="stat-value" style="font-size:16px;">Kalyan</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-2 section">
+          <div class="card animate-in">
+            <div class="card-header"><h3>Sales Trend</h3></div>
+            <div class="chart-wrapper"><canvas id="reportSalesChart"></canvas></div>
+          </div>
+          <div class="card animate-in">
+            <div class="card-header"><h3>Category Performance</h3></div>
+            <div class="chart-wrapper"><canvas id="reportCategoryChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="grid grid-2 section">
+          <div class="table-container animate-in">
+            <div class="table-header"><h3>Top Customers by Revenue</h3></div>
+            <table class="data-table">
+              <thead>
+                <tr><th>Customer</th><th>Bills</th><th>Revenue</th><th>Category</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="item-name">Priya Sharma</td><td>24</td><td><strong>₹12.45L</strong></td><td><span class="badge badge-gold">Gold</span></td></tr>
+                <tr><td class="item-name">Vikram Singh</td><td>18</td><td><strong>₹9.80L</strong></td><td><span class="badge badge-burgundy">Diamond</span></td></tr>
+                <tr><td class="item-name">Neha Kapoor</td><td>21</td><td><strong>₹8.76L</strong></td><td><span class="badge badge-burgundy">Diamond</span></td></tr>
+                <tr><td class="item-name">Deepak Joshi</td><td>14</td><td><strong>₹6.54L</strong></td><td><span class="badge badge-burgundy">Diamond</span></td></tr>
+                <tr><td class="item-name">Anjali Gupta</td><td>15</td><td><strong>₹5.67L</strong></td><td><span class="badge badge-info">Silver</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-container animate-in">
+            <div class="table-header"><h3>Supplier Purchase Summary</h3></div>
+            <table class="data-table">
+              <thead>
+                <tr><th>Supplier</th><th>Orders</th><th>Total Value</th><th>Reliability</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="item-name">Kalyan Suppliers</td><td>145</td><td><strong>₹1.25Cr</strong></td><td><span class="badge badge-success">Excellent</span></td></tr>
+                <tr><td class="item-name">Tanishq Wholesale</td><td>98</td><td><strong>₹2.48Cr</strong></td><td><span class="badge badge-success">Excellent</span></td></tr>
+                <tr><td class="item-name">GRT Diamonds</td><td>67</td><td><strong>₹1.89Cr</strong></td><td><span class="badge badge-success">Excellent</span></td></tr>
+                <tr><td class="item-name">Malabar Traders</td><td>87</td><td><strong>₹89L</strong></td><td><span class="badge badge-gold">Good</span></td></tr>
+                <tr><td class="item-name">Senco Gold Supply</td><td>56</td><td><strong>₹32L</strong></td><td><span class="badge badge-gold">Good</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>
