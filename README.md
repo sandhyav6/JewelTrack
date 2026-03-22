@@ -139,4 +139,63 @@ Built using **HTML, CSS, and Vanilla JavaScript**, the project focuses on combin
 git clone https://github.com/your-username/your-repo-name.git
 ```
 
-2. Open the proj
+2. Open the project folder
+
+3. Run the project by opening:
+
+```bash
+index.html
+```
+
+No installation or dependencies required.
+
+---
+
+## 📱 Responsiveness
+
+The application is fully responsive and adapts to:
+
+* Desktop screens
+* Tablets
+* Mobile devices
+
+---
+
+## 🎯 Project Objective
+
+This project was developed to simulate a **real-world jewellery store management system**, focusing on:
+
+* Frontend architecture
+* UI/UX design
+* Modular JavaScript
+* Data-driven interfaces
+* Business workflow simulation
+
+---
+
+## 🔮 Future Enhancements
+
+* Backend integration (Node.js / Express / Oracle SQL)
+* Authentication system
+* Real database connectivity
+* PDF invoice generation
+* Barcode/QR integration
+* Advanced reporting and analytics
+
+---
+
+## 👩‍💻 Author
+
+Developed as part of a B.Tech Computer Science project.
+
+---
+
+## ⭐ Final Note
+
+This project combines **functional depth** with **premium visual design**, making it suitable for:
+
+* Academic submission
+* Portfolio showcase
+* Frontend development practice
+
+---
