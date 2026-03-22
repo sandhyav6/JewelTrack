@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suppliers — JewelTrack</title>
+  <meta name="description" content="Manage suppliers in JewelTrack">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo"><i class="fa-solid fa-gem"></i></div>
+        <div class="sidebar-brand">JewelTrack<small>Management System</small></div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+        <a href="customers.html" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
+        <a href="items.html" class="nav-item"><i class="fa-solid fa-gem"></i> Jewellery Items</a>
+        <a href="suppliers.html" class="nav-item active"><i class="fa-solid fa-truck-field"></i> Suppliers</a>
+        <div class="nav-section-label">Transactions</div>
+        <a href="billing.html" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Billing / Sales</a>
+        <a href="purchases.html" class="nav-item"><i class="fa-solid fa-cart-shopping"></i> Purchases</a>
+        <div class="nav-section-label">Operations</div>
+        <a href="inventory.html" class="nav-item"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+        <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="index.html" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </div>
+    </aside>
+    <div class="sidebar-overlay"></div>
+
+    <div class="main-container">
+      <header class="navbar">
+        <div class="navbar-left">
+          <button class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+          <div class="page-title-section">
+            <h2>Suppliers</h2>
+            <div class="breadcrumb"><a href="dashboard.html">Home</a><span class="separator">/</span><span>Suppliers</span></div>
+          </div>
+        </div>
+        <div class="navbar-right">
+          <div class="navbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search anything..."></div>
+          <span class="navbar-date" id="navDate"></span>
+          <button class="navbar-icon-btn"><i class="fa-solid fa-bell"></i><span class="notification-badge"></span></button>
+          <div class="navbar-profile">
+            <div class="profile-avatar">SV</div>
+            <div class="profile-info"><span class="name">Sandhya V.</span><span class="role">Admin</span></div>
+            <div class="profile-dropdown">
+              <a href="settings.html"><i class="fa-solid fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+              <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h1>Supplier Management</h1>
+            <p>Manage your jewellery supplier relationships</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn btn-primary" onclick="openAddSupplier()"><i class="fa-solid fa-plus"></i> Add Supplier</button>
+          </div>
+        </div>
+
+        <div class="table-container animate-in">
+          <div class="table-header">
+            <h3>All Suppliers <span class="badge badge-muted" id="supplierCount">0</span></h3>
+            <div class="table-actions">
+              <div class="table-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search suppliers..." id="supplierSearch" oninput="searchSuppliers()">
+              </div>
+              <div class="table-filter">
+                <select id="supplierFilter" onchange="searchSuppliers()">
+                  <option value="all">All Categories</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Diamond">Diamond</option>
+                  <option value="Silver">Silver</option>
+                  <option value="Platinum">Platinum</option>
+                  <option value="Gemstone">Gemstone</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Supplier ID</th>
+                  <th>Supplier Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Category</th>
+                  <th>Last Supply</th>
+                  <th>Total Orders</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="supplierTableBody"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="supplierInfo">Showing 0 suppliers</span>
+            <div class="pagination"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add/Edit Supplier Modal -->
+  <div class="modal-overlay" id="addSupplierModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="supplierModalTitle">Add New Supplier</h3>
+        <button class="modal-close" onclick="closeModal('addSupplierModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="supplierForm">
+          <input type="hidden" id="editSupplierId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="supName">Supplier Name *</label>
+              <input type="text" id="supName" class="form-control" placeholder="Enter supplier name">
+              <span class="form-error">Name is required</span>
+            </div>
+            <div class="form-group">
+              <label for="supPhone">Phone *</label>
+              <input type="text" id="supPhone" class="form-control" placeholder="+91 98765 43210">
+              <span class="form-error">Phone is required</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="supEmail">Email</label>
+              <input type="email" id="supEmail" class="form-control" placeholder="supplier@email.com">
+            </div>
+            <div class="form-group">
+              <label for="supCategory">Category Supplied</label>
+              <select id="supCategory" class="form-control">
+                <option value="Gold">Gold</option>
+                <option value="Diamond">Diamond</option>
+                <option value="Silver">Silver</option>
+                <option value="Platinum">Platinum</option>
+                <option value="Gemstone">Gemstone</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="supStatus">Status</label>
+              <select id="supStatus" class="form-control">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="supReliability">Reliability</label>
+              <select id="supReliability" class="form-control">
+                <option value="Excellent">Excellent</option>
+                <option value="Good">Good</option>
+                <option value="Average">Average</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="supAddress">Address</label>
+            <textarea id="supAddress" class="form-control" placeholder="Supplier address" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('addSupplierModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSupplier()">Save Supplier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Supplier Modal -->
+  <div class="modal-overlay" id="viewSupplierModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>Supplier Details</h3>
+        <button class="modal-close" onclick="closeModal('viewSupplierModal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="viewSupplierBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container"></div>
+  <script src="js/main.js"></script>
+  <script src="js/suppliers.js"></script>
+</body>
+</html>
