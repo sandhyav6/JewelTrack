@@ -348,6 +348,11 @@
 
   <script src="js/main.js"></script>
   <script>
+    // Auto-redirect if already logged in
+    if (localStorage.getItem('jms-authenticated') === 'true') {
+      window.location.href = 'dashboard.html';
+    }
+
     // Toggle password visibility
     function togglePassword() {
       const input = document.getElementById('loginPassword');
@@ -361,43 +366,62 @@
       }
     }
 
-    // Handle login
+    // Demo credential pairs per role
+    const CREDENTIALS = {
+      Admin: { email: 'admin@jeweltrack.com', password: 'admin123', name: 'Sandhya V.', avatar: 'SV' },
+      Staff: { email: 'staff@jeweltrack.com', password: 'staff123', name: 'Rahul M.', avatar: 'RM' }
+    };
+
+    // Handle login form submission
     function handleLogin(e) {
       e.preventDefault();
       let valid = true;
 
-      const email = document.getElementById('loginEmail');
-      const password = document.getElementById('loginPassword');
+      const emailInput = document.getElementById('loginEmail');
+      const passwordInput = document.getElementById('loginPassword');
+      const roleSelect = document.getElementById('loginRole');
 
-      if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-        email.closest('.form-group').classList.add('has-error');
+      // Validate email
+      if (!emailInput.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+        emailInput.closest('.form-group').classList.add('has-error');
         valid = false;
       } else {
-        email.closest('.form-group').classList.remove('has-error');
+        emailInput.closest('.form-group').classList.remove('has-error');
       }
 
-      if (!password.value.trim()) {
-        password.closest('.form-group').classList.add('has-error');
+      // Validate password present
+      if (!passwordInput.value.trim()) {
+        passwordInput.closest('.form-group').classList.add('has-error');
         valid = false;
       } else {
-        password.closest('.form-group').classList.remove('has-error');
+        passwordInput.closest('.form-group').classList.remove('has-error');
       }
 
       if (!valid) return;
 
-      // Simulate login
+      // Map select value to role label
+      const roleMap = { admin: 'Admin', staff: 'Staff' };
+      const role = roleMap[roleSelect.value];
+      const cred = CREDENTIALS[role];
+
+      // Validate credentials match selected role
+      if (emailInput.value.trim() !== cred.email || passwordInput.value !== cred.password) {
+        showToast('error', 'Login Failed', 'Invalid credentials for selected role.');
+        return;
+      }
+
+      // Show loading state
       const btn = document.getElementById('loginBtn');
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing In...';
       btn.disabled = true;
 
       setTimeout(() => {
-        localStorage.setItem('jms-user', JSON.stringify({
-          name: 'Sandhya V.',
-          role: document.getElementById('loginRole').value,
-          email: email.value
-        }));
+        // Store session
+        const userObj = { name: cred.name, email: cred.email, role: role, avatar: cred.avatar };
+        localStorage.setItem('jms-current-user', JSON.stringify(userObj));
+        localStorage.setItem('jms-authenticated', 'true');
         window.location.href = 'dashboard.html';
-      }, 1200);
+      }, 1000);
     }
   </script>
 </body>

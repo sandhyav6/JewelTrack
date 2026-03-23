@@ -289,11 +289,330 @@ function generateId(prefix) {
   return prefix + Date.now().toString(36).toUpperCase();
 }
 
-// ===== Initialize on DOM Load =====
-document.addEventListener('DOMContentLoaded', () => {
+/* ===================================================================
+   AUTH & ROLE-BASED ACCESS CONTROL
+   ================================================================= */
+
+// Demo credentials — no backend required
+const JMS_CREDENTIALS = [
+  {
+    email: 'admin@jeweltrack.com',
+    password: 'admin123',
+    role: 'Admin',
+    name: 'Sandhya V.',
+    avatar: 'SV'
+  },
+  {
+    email: 'staff@jeweltrack.com',
+    password: 'staff123',
+    role: 'Staff',
+    name: 'Rahul M.',
+    avatar: 'RM'
+  }
+];
+
+/**
+ * Returns parsed current-user object from localStorage, or null.
+ */
+function getCurrentUser() {
+  try {
+    const raw = localStorage.getItem('jms-current-user');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Returns true if the user is properly authenticated.
+ */
+function isAuthenticated() {
+  return localStorage.getItem('jms-authenticated') === 'true' && getCurrentUser() !== null;
+}
+
+/**
+ * Clears session and redirects to login page.
+ */
+function logoutUser() {
+  localStorage.removeItem('jms-current-user');
+  localStorage.removeItem('jms-authenticated');
+  window.location.href = 'index.html';
+}
+
+/**
+ * Enforces authentication — redirects to login if not authenticated.
+ * Call on every internal page.
+ */
+function requireAuth() {
+  if (!isAuthenticated()) {
+    window.location.href = 'index.html';
+  }
+}
+
+/**
+ * Returns the list of allowed pages for a given role.
+ */
+function getRolePermissions(role) {
+  const permissions = {
+    Admin: [
+      'dashboard.html',
+      'customers.html',
+      'items.html',
+      'suppliers.html',
+      'billing.html',
+      'purchases.html',
+      'inventory.html',
+      'reports.html',
+      'settings.html'
+    ],
+    Staff: [
+      'dashboard.html',
+      'customers.html',
+      'items.html',
+      'billing.html',
+      'inventory.html'
+    ]
+  };
+  return permissions[role] || [];
+}
+
+/**
+ * Enforces page-level access based on role.
+ * Redirects non-permitted users to dashboard.html with a toast.
+ */
+function enforcePageAccess() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+  const allowed = getRolePermissions(user.role);
+
+  if (!allowed.includes(currentPage)) {
+    // Show toast then redirect
+    setTimeout(() => {
+      showToast('error', 'Access Denied', 'You do not have access to this page.');
+    }, 100);
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 1500);
+  }
+}
+
+/**
+ * Updates the navbar profile avatar, name, and role from the current user.
+ */
+function applyUserProfileToUI() {
+  const user = getCurrentUser();
+  if (!user) return;
+
+  // Navbar avatar
+  const avatarEl = document.getElementById('profileAvatar');
+  if (avatarEl) avatarEl.textContent = user.avatar;
+
+  // Navbar name
+  const nameEl = document.getElementById('profileName');
+  if (nameEl) nameEl.textContent = user.name;
+
+  // Navbar role badge
+  const roleEl = document.getElementById('profileRole');
+  if (roleEl) roleEl.textContent = user.role;
+
+  // Update the welcome greeting on dashboard if present
+  const greetingEl = document.querySelector('.page-header h1[data-greeting]');
+  if (greetingEl) {
+    const firstName = user.name.split(' ')[0];
+    greetingEl.textContent = `Good ${getTimeOfDay()}, ${firstName} ✨`;
+  }
+}
+
+function getTimeOfDay() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Morning';
+  if (h < 17) return 'Afternoon';
+  return 'Evening';
+}
+
+/**
+ * Hides sidebar nav items that the current user's role shouldn't see.
+ * Also hides admin-only items in the profile dropdown.
+ */
+function applyRoleBasedNavigation() {
+  const user = getCurrentUser();
+  if (!user || user.role === 'Admin') return; // Admin sees everything
+
+  // Pages to hide from staff in sidebar
+  const staffHiddenPages = ['suppliers.html', 'purchases.html', 'reports.html', 'settings.html'];
+
+  // Hide sidebar nav items
+  document.querySelectorAll('.sidebar-nav .nav-item, .sidebar-footer .nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    if (href && staffHiddenPages.some(p => href.includes(p))) {
+      item.style.display = 'none';
+    }
+  });
+
+  // Hide nav-section-labels that become orphaned for staff:
+  // "Operations" label is above inventory & reports — reports is hidden but inventory stays, so keep label.
+  // However we should hide Reports nav-section if needed. The labels don't need hiding here since
+  // at least one item remains under each visible section.
+
+  // Hide Settings & Reports links in profile dropdown
+  document.querySelectorAll('.profile-dropdown a').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href && (href.includes('settings.html'))) {
+      link.style.display = 'none';
+    }
+  });
+}
+
+/**
+ * Hides or restricts admin-only actions on pages the Staff can access.
+ * - No delete buttons
+ * - No Add Customer, Add Item buttons
+ * - No report export/generate controls
+ * Also prefills billEmployee for billing page.
+ */
+function applyRoleBasedActionRestrictions() {
+  const user = getCurrentUser();
+  if (!user || user.role === 'Admin') {
+    // For Admin, still prefill the employee field in billing
+    _prefillBillingEmployee();
+    return;
+  }
+
+  // --- Customers page ---
+  // Hide "Add Customer" button
+  const addCustomerBtns = document.querySelectorAll('[onclick*="addCustomerModal"], [onclick*="openModal(\'addCustomerModal\')"]');
+  addCustomerBtns.forEach(btn => btn.style.display = 'none');
+
+  // --- Items page ---
+  // Hide "Add Item" button
+  const addItemBtns = document.querySelectorAll('[onclick*="openAddItem"]');
+  addItemBtns.forEach(btn => btn.style.display = 'none');
+
+  // --- Hide all [data-admin-only] elements globally (e.g. dashboard quick actions) ---
+  document.querySelectorAll('[data-admin-only]').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  // --- Customers page: also hide by stable ID ---
+  const addCustomerBtn = document.getElementById('addCustomerBtn');
+  if (addCustomerBtn) addCustomerBtn.style.display = 'none';
+
+  // --- Items page: also hide by stable ID ---
+  const addItemBtn = document.getElementById('addItemBtn');
+  if (addItemBtn) addItemBtn.style.display = 'none';
+
+  // --- Global: hide all delete buttons ---
+  document.querySelectorAll('[onclick*="delete"], [onclick*="Delete"], .btn-danger:not(.confirm-btn)').forEach(btn => {
+    // Only hide action delete buttons, not confirm dialog confirm button
+    if (!btn.classList.contains('confirm-btn')) {
+      btn.style.display = 'none';
+    }
+  });
+
+  // --- Global: hide edit buttons on restricted pages (not billing) ---
+  // Staff can still use view on customers/items but not edit
+  const currentPage = window.location.pathname.split('/').pop();
+  if (currentPage === 'customers.html' || currentPage === 'items.html') {
+    // Wire up a MutationObserver to also hide buttons added dynamically by JS
+    _observeAndHideRestrictedButtons(currentPage);
+  }
+
+  // --- Billing page: prefill employee field ---
+  _prefillBillingEmployee();
+}
+
+/**
+ * Prefills the Sales Employee dropdown in billing.html with the logged-in user.
+ */
+function _prefillBillingEmployee() {
+  const billEmployee = document.getElementById('billEmployee');
+  if (!billEmployee) return;
+  const user = getCurrentUser();
+  if (!user) return;
+
+  // Try to select the matching option; if not found, add it
+  let found = false;
+  for (const opt of billEmployee.options) {
+    if (opt.value === user.name || opt.textContent.trim() === user.name) {
+      billEmployee.value = opt.value;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    const opt = document.createElement('option');
+    opt.value = user.name;
+    opt.textContent = user.name;
+    billEmployee.appendChild(opt);
+    billEmployee.value = user.name;
+  }
+}
+
+/**
+ * Uses MutationObserver to hide restricted action buttons dynamically rendered by page JS.
+ */
+function _observeAndHideRestrictedButtons(currentPage) {
+  const user = getCurrentUser();
+  if (!user || user.role === 'Admin') return;
+
+  function hideButtons(root) {
+    // Hide edit and delete action buttons in tables
+    root.querySelectorAll('[onclick*="edit"], [onclick*="Edit"], [onclick*="delete"], [onclick*="Delete"]').forEach(btn => {
+      if (!btn.classList.contains('confirm-btn')) {
+        btn.style.display = 'none';
+      }
+    });
+    // Hide delete-related btn-danger buttons
+    root.querySelectorAll('.btn-danger:not(.confirm-btn)').forEach(btn => {
+      btn.style.display = 'none';
+    });
+  }
+
+  // Initial pass
+  hideButtons(document.body);
+
+  // Watch for dynamic renders (table rows, cards)
+  const observer = new MutationObserver(() => {
+    hideButtons(document.body);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+/* ===================================================================
+   INTERNAL PAGE SHARED INITIALIZATION
+   Call this from every internal page after main.js loads.
+   ================================================================= */
+function initInternalPage() {
   initTheme();
+  requireAuth();
+  enforcePageAccess();
   initSidebar();
   initActiveNav();
   initProfileDropdown();
   initDateTime();
+  applyUserProfileToUI();
+  applyRoleBasedNavigation();
+  applyRoleBasedActionRestrictions();
+}
+
+// ===== Initialize on DOM Load =====
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  // Internal pages call initInternalPage() from their own page script.
+  // Login page (index.html) only needs initTheme.
+  // If sidebar exists, this is an internal page — initialize shared components.
+  if (document.querySelector('.sidebar')) {
+    requireAuth();
+    enforcePageAccess();
+    initSidebar();
+    initActiveNav();
+    initProfileDropdown();
+    initDateTime();
+    applyUserProfileToUI();
+    applyRoleBasedNavigation();
+    applyRoleBasedActionRestrictions();
+  }
 });

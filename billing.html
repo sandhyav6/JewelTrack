@@ -19,20 +19,20 @@
       </div>
       <nav class="sidebar-nav">
         <div class="nav-section-label">Main</div>
-        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
-        <a href="customers.html" class="nav-item"><i class="fa-solid fa-users"></i> Customers</a>
-        <a href="items.html" class="nav-item"><i class="fa-solid fa-gem"></i> Jewellery Items</a>
-        <a href="suppliers.html" class="nav-item"><i class="fa-solid fa-truck-field"></i> Suppliers</a>
+        <a href="dashboard.html" class="nav-item" data-page="dashboard.html"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+        <a href="customers.html" class="nav-item" data-page="customers.html"><i class="fa-solid fa-users"></i> Customers</a>
+        <a href="items.html" class="nav-item" data-page="items.html"><i class="fa-solid fa-gem"></i> Jewellery Items</a>
+        <a href="suppliers.html" class="nav-item" data-page="suppliers.html"><i class="fa-solid fa-truck-field"></i> Suppliers</a>
         <div class="nav-section-label">Transactions</div>
-        <a href="billing.html" class="nav-item active"><i class="fa-solid fa-file-invoice-dollar"></i> Billing / Sales</a>
-        <a href="purchases.html" class="nav-item"><i class="fa-solid fa-cart-shopping"></i> Purchases</a>
+        <a href="billing.html" class="nav-item active" data-page="billing.html"><i class="fa-solid fa-file-invoice-dollar"></i> Billing / Sales</a>
+        <a href="purchases.html" class="nav-item" data-page="purchases.html"><i class="fa-solid fa-cart-shopping"></i> Purchases</a>
         <div class="nav-section-label">Operations</div>
-        <a href="inventory.html" class="nav-item"><i class="fa-solid fa-warehouse"></i> Inventory</a>
-        <a href="reports.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+        <a href="inventory.html" class="nav-item" data-page="inventory.html"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+        <a href="reports.html" class="nav-item" data-page="reports.html"><i class="fa-solid fa-chart-pie"></i> Reports</a>
       </nav>
       <div class="sidebar-footer">
-        <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
-        <a href="index.html" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        <a href="settings.html" class="nav-item" data-page="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="#" onclick="logoutUser()" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
       </div>
     </aside>
     <div class="sidebar-overlay"></div>
@@ -51,12 +51,12 @@
           <span class="navbar-date" id="navDate"></span>
           <button class="navbar-icon-btn"><i class="fa-solid fa-bell"></i><span class="notification-badge"></span></button>
           <div class="navbar-profile">
-            <div class="profile-avatar">SV</div>
-            <div class="profile-info"><span class="name">Sandhya V.</span><span class="role">Admin</span></div>
+            <div class="profile-avatar" id="profileAvatar">SV</div>
+            <div class="profile-info"><span class="name" id="profileName">Sandhya V.</span><span class="role" id="profileRole">Admin</span></div>
             <div class="profile-dropdown">
               <a href="settings.html"><i class="fa-solid fa-user"></i> My Profile</a>
               <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
-              <a href="index.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+              <a href="#" onclick="logoutUser()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
             </div>
           </div>
         </div>

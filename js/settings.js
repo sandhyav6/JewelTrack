@@ -15,8 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
   if (saved.storeAddress) document.getElementById('storeAddress').value = saved.storeAddress;
   if (saved.gstRate) document.getElementById('gstRate').value = saved.gstRate;
   if (saved.gstNumber) document.getElementById('gstNumber').value = saved.gstNumber;
-  if (saved.profileName) document.getElementById('profileName').value = saved.profileName;
-  if (saved.profileEmail) document.getElementById('profileEmail').value = saved.profileEmail;
+
+  // Populate user profile fields from session
+  const user = getCurrentUser();
+  if (user) {
+    const nameField = document.getElementById('settingsProfileName');
+    const roleField = document.getElementById('settingsProfileRole');
+    const emailField = document.getElementById('profileEmail');
+    if (nameField) nameField.value = saved.profileName || user.name || '';
+    if (roleField) roleField.value = user.role || '';
+    if (emailField) emailField.value = saved.profileEmail || user.email || '';
+  }
 });
 
 // ===== Theme Toggle Handler =====
@@ -37,7 +46,7 @@ function saveSettings() {
     gstNumber: document.getElementById('gstNumber').value,
     includeGST: document.getElementById('includeGST').checked,
     taxBreakdown: document.getElementById('taxBreakdown').checked,
-    profileName: document.getElementById('profileName').value,
+    profileName: document.getElementById('settingsProfileName') ? document.getElementById('settingsProfileName').value : '',
     profileEmail: document.getElementById('profileEmail').value,
     darkMode: document.getElementById('darkModeToggle').checked,
     compact: document.getElementById('compactToggle').checked,
