@@ -280,6 +280,23 @@ function animateStats() {
 
 // ===== Initialize Dashboard =====
 document.addEventListener('DOMContentLoaded', () => {
+  // Update greeting with logged-in user's name
+  const user = getCurrentUser();
+  const greetingEl = document.getElementById('dashGreeting');
+  if (greetingEl && user) {
+    const firstName = user.name.split(' ')[0];
+    const h = new Date().getHours();
+    const tod = h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
+    greetingEl.textContent = `Good ${tod}, ${firstName} \u2728`;
+  }
+
+  // Hide admin-only quick actions for Staff
+  if (user && user.role === 'Staff') {
+    document.querySelectorAll('[data-admin-only]').forEach(el => {
+      el.style.display = 'none';
+    });
+  }
+
   animateStats();
   initSalesChart();
   initCategoryChart();
