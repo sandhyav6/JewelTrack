@@ -2,20 +2,42 @@
    JEWELLERY STORE — Purchases Page Logic
    ================================================================= */
 
-let purchases = [
-  { id: 'PO-1201', supplier: 'Kalyan Suppliers', item: 'Gold Chain 22K', qty: 15, costPrice: 48000, date: '2026-03-22', notes: 'Bulk order for festive season' },
-  { id: 'PO-1202', supplier: 'Tanishq Wholesale', item: 'Diamond Studs 0.5ct', qty: 10, costPrice: 52000, date: '2026-03-20', notes: '' },
-  { id: 'PO-1203', supplier: 'Malabar Traders', item: 'Ruby Pendant 18K', qty: 8, costPrice: 28000, date: '2026-03-18', notes: 'Natural Burmese rubies' },
-  { id: 'PO-1204', supplier: 'Senco Gold Supply', item: 'Silver Bangle 925', qty: 25, costPrice: 2800, date: '2026-03-15', notes: 'Sterling silver, various designs' },
-  { id: 'PO-1205', supplier: 'GRT Diamonds', item: 'Solitaire Ring 1ct', qty: 5, costPrice: 185000, date: '2026-03-12', notes: 'GIA certified' },
-  { id: 'PO-1206', supplier: 'PC Jeweller Dist.', item: 'Platinum Chain 20"', qty: 12, costPrice: 78000, date: '2026-03-10', notes: '' },
-  { id: 'PO-1207', supplier: 'Joyalukkas Gems', item: 'Emerald Gemstone Lot', qty: 20, costPrice: 15000, date: '2026-03-08', notes: 'Zambian emeralds, mixed sizes' },
-  { id: 'PO-1208', supplier: 'Kalyan Suppliers', item: 'Gold Necklace 22K', qty: 6, costPrice: 125000, date: '2026-03-05', notes: 'Temple jewellery design' },
-  { id: 'PO-1209', supplier: 'Tanishq Wholesale', item: 'Diamond Tennis Bracelet', qty: 4, costPrice: 280000, date: '2026-03-02', notes: '18K white gold setting' },
-  { id: 'PO-1210', supplier: 'Malabar Traders', item: 'Pearl Necklace Set', qty: 10, costPrice: 42000, date: '2026-02-28', notes: 'Freshwater pearls' },
-];
+let purchases = [];
+let purchaseSuppliers = [];
+let purchaseItemsArr = [];
 
-let purchaseCounter = 1211;
+async function loadPurchaseDropdowns() {
+  const [sups, itms] = await Promise.all([
+    fetchData('/api/suppliers'),
+    fetchData('/api/items')
+  ]);
+  if (sups) {
+    purchaseSuppliers = sups;
+    document.getElementById('purSupplier').innerHTML = '<option value="">Select Supplier</option>' + sups.map(s => `<option value="${s.SUPPLIERID}">${s.SUPPLIERNAME}</option>`).join('');
+  }
+  if (itms) {
+    purchaseItemsArr = itms;
+    document.getElementById('purItem').innerHTML = '<option value="">Select Item</option>' + itms.map(i => `<option value="${i.ITEMID}">${i.ITEMNAME} (Stock: ${i.CURRENTSTOCK})</option>`).join('');
+  }
+}
+
+async function loadPurchases() {
+  const data = await fetchData('/api/purchases');
+  if (data) {
+    purchases = data.map(p => ({
+      id: p.PURCHASEID,
+      supplier: p.SUPPLIERNAME,
+      item: p.ITEMS ? p.ITEMS.split(',').length > 1 ? p.ITEMS.split(',')[0] + ' + more' : p.ITEMS : 'Unknown',
+      qty: p.TOTALITEMS,
+      costPrice: p.TOTALITEMS > 0 ? (p.TOTALAMOUNT / p.TOTALITEMS) : p.TOTALAMOUNT,
+      totalValue: p.TOTALAMOUNT,
+      date: p.PURCHASEDATE
+    }));
+    searchPurchases();
+    renderRecentPurchases();
+    renderTopSuppliers();
+  }
+}
 
 function renderPurchases(data) {
   if (!data) data = purchases;
@@ -38,8 +60,8 @@ function renderPurchases(data) {
       <td>${formatDate(p.date)}</td>
       <td>
         <div class="action-btns">
-          <button class="action-btn view" title="View" onclick="showToast('info','Purchase Details','${p.item} from ${p.supplier} — ${p.qty} units at ₹${p.costPrice.toLocaleString("en-IN")} each.')"><i class="fa-solid fa-eye"></i></button>
-          <button class="action-btn delete" title="Delete" onclick="deletePurchase('${p.id}')"><i class="fa-solid fa-trash-can"></i></button>
+          <button class="action-btn view" title="View" onclick="showToast('info','Purchase Details','${p.item} from ${p.supplier} — ${p.qty} units at ₹${p.totalValue.toLocaleString("en-IN")} total.')"><i class="fa-solid fa-eye"></i></button>
+          <button class="action-btn delete" title="Cannot Delete" onclick="showToast('warning', 'Restricted', 'Purchases cannot be deleted for accounting integrity.')"><i class="fa-solid fa-lock"></i></button>
         </div>
       </td>
     </tr>
@@ -54,7 +76,7 @@ function searchPurchases() {
   renderPurchases(filtered);
 }
 
-function savePurchase() {
+async function savePurchase() {
   const supplier = document.getElementById('purSupplier');
   const item = document.getElementById('purItem');
   const qty = document.getElementById('purQty');
@@ -68,33 +90,34 @@ function savePurchase() {
 
   if (!valid) return;
 
-  const newPurchase = {
-    id: 'PO-' + purchaseCounter++,
-    supplier: supplier.value,
-    item: item.value.trim(),
-    qty: parseInt(qty.value),
-    costPrice: parseFloat(cost.value),
-    date: document.getElementById('purDate').value || new Date().toISOString().split('T')[0],
-    notes: document.getElementById('purNotes').value.trim(),
+  const payload = {
+    supplierId: supplier.value,
+    status: 'Completed',
+    paymentMethod: 'Bank Transfer',
+    items: [
+      {
+        itemId: item.value,
+        quantity: parseInt(qty.value),
+        unitCost: parseFloat(cost.value)
+      }
+    ]
   };
 
-  purchases.unshift(newPurchase);
-  closeModal('addPurchaseModal');
-  document.getElementById('purchaseForm').reset();
-  renderPurchases();
-  renderRecentPurchases();
-  showToast('success', 'Purchase Recorded', `${newPurchase.item} from ${newPurchase.supplier} added.`);
+  const res = await fetchData('/api/purchases', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  if (res) {
+    showToast('success', 'Purchase Recorded', `Purchase verified and inventory incremented.`);
+    closeModal('addPurchaseModal');
+    document.getElementById('purchaseForm').reset();
+    await loadPurchases();
+  }
 }
 
 function deletePurchase(id) {
-  const p = purchases.find(x => x.id === id);
-  if (!p) return;
-  showConfirmDialog('Delete Purchase', `Remove purchase <strong>${p.id}</strong>?`, () => {
-    purchases = purchases.filter(x => x.id !== id);
-    renderPurchases();
-    renderRecentPurchases();
-    showToast('success', 'Deleted', `Purchase ${p.id} removed.`);
-  });
+  showToast('warning', 'Restricted Action', 'Transactions are permanent and cannot be deleted.');
 }
 
 function openAddPurchase() {
@@ -140,11 +163,9 @@ function renderTopSuppliers() {
   `).join('');
 }
 
-// Auto-calculate total
-document.addEventListener('DOMContentLoaded', () => {
-  renderPurchases();
-  renderRecentPurchases();
-  renderTopSuppliers();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadPurchaseDropdowns();
+  await loadPurchases();
 
   const qtyEl = document.getElementById('purQty');
   const costEl = document.getElementById('purCost');

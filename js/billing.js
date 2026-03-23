@@ -2,38 +2,43 @@
    JEWELLERY STORE — Billing Page Logic
    ================================================================= */
 
-// Available items for billing
-const availableItems = [
-  { id: 'JW-1001', name: 'Gold Necklace (22K)', price: 147000 },
-  { id: 'JW-1002', name: 'Diamond Solitaire Ring', price: 285000 },
-  { id: 'JW-1003', name: 'Silver Bangle Set (925)', price: 12800 },
-  { id: 'JW-1004', name: 'Ruby Pendant (18K)', price: 34200 },
-  { id: 'JW-1005', name: 'Bridal Kundan Set', price: 425000 },
-  { id: 'JW-1007', name: 'Platinum Chain 20"', price: 98500 },
-  { id: 'JW-1008', name: 'Gold Bangles (22K, Set)', price: 192000 },
-  { id: 'JW-1009', name: 'Pearl Necklace Set', price: 56000 },
-  { id: 'JW-1010', name: 'Silver Anklet Pair', price: 4500 },
-  { id: 'JW-1012', name: 'Diamond Tennis Bracelet', price: 345000 },
-];
-
+let availableItems = [];
 let billItems = [];
-let billCounter = 2848;
+let currentBillTotals = { discount: 0, tax: 0, total: 0 };
 
 // ===== Initialize Billing Page =====
-function initBilling() {
-  // Generate bill number
-  document.getElementById('billNumber').value = 'BL-' + billCounter;
+async function initBilling() {
+  const [items, customers, employees, nextNumber] = await Promise.all([
+    fetchData('/api/items'),
+    fetchData('/api/customers'),
+    fetchData('/api/employees'),
+    fetchData('/api/bills/next-number')
+  ]);
 
-  // Set today's date
+  if (items) availableItems = items;
+  
+  if (nextNumber && nextNumber.nextBillNo) {
+    document.getElementById('billNumber').value = nextNumber.nextBillNo;
+  }
+
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('billDate').value = today;
 
-  // Populate item selector
-  const select = document.getElementById('billItem');
-  select.innerHTML = '<option value="">Choose an item</option>' +
-    availableItems.map(i => `<option value="${i.id}">${i.name} — ₹${i.price.toLocaleString('en-IN')}</option>`).join('');
+  if (items) {
+    document.getElementById('billItem').innerHTML = '<option value="">Choose an item</option>' +
+      items.filter(i => i.CURRENTSTOCK > 0).map(i => `<option value="${i.ITEMID}">${i.ITEMNAME} (Stock: ${i.CURRENTSTOCK}) — ₹${(i.BASEPRICE || 0).toLocaleString('en-IN')}</option>`).join('');
+  }
 
-  // Live preview updates
+  if (customers) {
+    document.getElementById('billCustomer').innerHTML = '<option value="">Select Customer</option>' +
+      customers.map(c => `<option value="${c.CUSTOMERID}">${c.CUSTOMERNAME} (${c.PHONE})</option>`).join('');
+  }
+
+  if (employees) {
+    document.getElementById('billEmployee').innerHTML = '<option value="">Select Billed By</option>' +
+      employees.map(e => `<option value="${e.EMPLOYEEID}">${e.FIRSTNAME} ${e.LASTNAME}</option>`).join('');
+  }
+
   document.getElementById('billCustomer').addEventListener('change', updatePreview);
   document.getElementById('billEmployee').addEventListener('change', updatePreview);
   document.getElementById('billDate').addEventListener('change', updatePreview);
@@ -52,15 +57,22 @@ function addBillItem() {
     return;
   }
 
-  const item = availableItems.find(i => i.id === itemId);
+  const item = availableItems.find(i => i.ITEMID === itemId);
   if (!item) return;
+
+  if (qty > item.CURRENTSTOCK) {
+    return showToast('error', 'Insufficient Stock', `Only ${item.CURRENTSTOCK} units available.`);
+  }
 
   // Check if item already in bill
   const existing = billItems.find(b => b.id === itemId);
   if (existing) {
+    if (existing.qty + qty > item.CURRENTSTOCK) {
+      return showToast('error', 'Insufficient Stock', `Cannot exceed available stock of ${item.CURRENTSTOCK}.`);
+    }
     existing.qty += qty;
   } else {
-    billItems.push({ id: item.id, name: item.name, price: item.price, qty: qty });
+    billItems.push({ id: item.ITEMID, name: item.ITEMNAME, price: item.BASEPRICE || 0, qty: qty, maxStock: item.CURRENTSTOCK });
   }
 
   document.getElementById('billItem').value = '';
@@ -97,6 +109,11 @@ function renderBillItems() {
 function updateItemQty(index, qty) {
   qty = parseInt(qty);
   if (qty < 1) qty = 1;
+  const item = billItems[index];
+  if (qty > item.maxStock) {
+    qty = item.maxStock;
+    showToast('warning', 'Stock Limit', `Maximum available stock is ${qty}.`);
+  }
   billItems[index].qty = qty;
   renderBillItems();
   updateTotals();
@@ -119,6 +136,8 @@ function updateTotals() {
   const taxableAmt = subtotal - discountAmt;
   const tax = taxableAmt * 0.03; // 3% GST
   const grandTotal = taxableAmt + tax;
+
+  currentBillTotals = { discount: discountAmt, tax: tax, total: grandTotal };
 
   document.getElementById('billSubtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
   document.getElementById('billTax').textContent = '₹' + Math.round(tax).toLocaleString('en-IN');
@@ -158,8 +177,9 @@ function updatePreview() {
 }
 
 // ===== Generate Bill =====
-function generateBill() {
-  if (!document.getElementById('billCustomer').value) {
+async function generateBill() {
+  const customerId = document.getElementById('billCustomer').value;
+  if (!customerId) {
     showToast('warning', 'Select Customer', 'Please select a customer for this bill.');
     return;
   }
@@ -169,43 +189,62 @@ function generateBill() {
     return;
   }
 
-  // Show success modal
-  const grandTotal = document.getElementById('billGrandTotal').textContent;
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay active';
-  overlay.innerHTML = `
-    <div class="modal" style="max-width:420px;text-align:center;">
-      <div class="modal-body" style="padding:40px 28px;">
-        <div style="width:72px;height:72px;border-radius:50%;background:rgba(46,125,50,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;color:var(--success);">
-          <i class="fa-solid fa-circle-check"></i>
-        </div>
-        <h3 style="margin-bottom:8px;">Bill Generated Successfully!</h3>
-        <p style="color:var(--text-muted);margin-bottom:4px;">Bill No: <strong>${document.getElementById('billNumber').value}</strong></p>
-        <p style="color:var(--text-muted);margin-bottom:4px;">Customer: <strong>${document.getElementById('billCustomer').value}</strong></p>
-        <p style="font-size:24px;font-weight:700;color:var(--text-dark);font-family:var(--font-heading);margin-top:16px;">${grandTotal}</p>
-      </div>
-      <div style="padding:0 28px 32px;display:flex;gap:10px;justify-content:center;">
-        <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow='';">Close</button>
-        <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow='';clearBill();">New Bill</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-  document.body.style.overflow = 'hidden';
+  const payload = {
+    customerId: customerId,
+    employeeId: document.getElementById('billEmployee').value || null,
+    paymentMethod: document.getElementById('billPayment').value,
+    discount: currentBillTotals.discount,
+    taxAmount: currentBillTotals.tax,
+    items: billItems.map(i => ({ itemId: i.id, quantity: i.qty, unitPrice: i.price }))
+  };
 
-  showToast('success', 'Bill Created', `Invoice ${document.getElementById('billNumber').value} generated.`);
+  const res = await fetchData('/api/bills', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+
+  if (res) {
+    const custSelect = document.getElementById('billCustomer');
+    const custName = custSelect.options[custSelect.selectedIndex].text;
+    const billNo = res.billId || document.getElementById('billNumber').value;
+    const grandTotal = document.getElementById('billGrandTotal').textContent;
+
+    // Show success modal
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay active';
+    overlay.innerHTML = `
+      <div class="modal" style="max-width:420px;text-align:center;">
+        <div class="modal-body" style="padding:40px 28px;">
+          <div style="width:72px;height:72px;border-radius:50%;background:rgba(46,125,50,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;color:var(--success);">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h3 style="margin-bottom:8px;">Bill Generated Successfully!</h3>
+          <p style="color:var(--text-muted);margin-bottom:4px;">Bill No: <strong>${billNo}</strong></p>
+          <p style="color:var(--text-muted);margin-bottom:4px;">Customer: <strong>${custName}</strong></p>
+          <p style="font-size:24px;font-weight:700;color:var(--text-dark);font-family:var(--font-heading);margin-top:16px;">${grandTotal}</p>
+        </div>
+        <div style="padding:0 28px 32px;display:flex;gap:10px;justify-content:center;">
+          <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow='';">Close</button>
+          <button class="btn btn-primary" onclick="this.closest('.modal-overlay').remove();document.body.style.overflow='';clearBill();">New Bill</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    showToast('success', 'Bill Created', `Invoice ${billNo} generated and stock updated.`);
+  }
 }
 
 // ===== Clear Bill =====
 function clearBill() {
   billItems = [];
-  billCounter++;
-  document.getElementById('billNumber').value = 'BL-' + billCounter;
   document.getElementById('billCustomer').value = '';
   document.getElementById('billDiscount').value = 0;
   renderBillItems();
   updateTotals();
   updatePreview();
+  initBilling();
 }
 
 // ===== Initialize =====

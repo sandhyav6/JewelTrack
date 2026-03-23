@@ -12,16 +12,20 @@ Chart.defaults.font.family = "'Poppins', sans-serif";
 Chart.defaults.font.size = 12;
 Chart.defaults.color = '#8B857D';
 
-function initReportCharts() {
+async function initReportCharts() {
   // Sales Trend
   const salesCtx = document.getElementById('reportSalesChart').getContext('2d');
+  const trend = (await fetchData('/api/reports/sales-trend?days=30')) || [];
+  const trendLabels = trend.length ? trend.map(t => formatDate(t.BILLDATE).substring(0, 5)) : Array.from({ length: 22 }, (_, i) => `Mar ${i + 1}`);
+  const trendData = trend.length ? trend.map(t => t.DAILYTOTAL) : [185000, 220000, 198000, 245000, 280000, 310000, 190000, 260000, 275000, 300000, 285000, 320000, 295000, 340000, 285000, 310000, 330000, 350000, 280000, 295000, 325000, 285400];
+
   new Chart(salesCtx, {
     type: 'line',
     data: {
-      labels: Array.from({ length: 22 }, (_, i) => `Mar ${i + 1}`),
+      labels: trendLabels,
       datasets: [{
         label: 'Daily Sales',
-        data: [185000, 220000, 198000, 245000, 280000, 310000, 190000, 260000, 275000, 300000, 285000, 320000, 295000, 340000, 285000, 310000, 330000, 350000, 280000, 295000, 325000, 285400],
+        data: trendData,
         borderColor: chartColors.gold,
         backgroundColor: chartColors.goldBg,
         fill: true,
@@ -42,14 +46,19 @@ function initReportCharts() {
 
   // Category Performance
   const catCtx = document.getElementById('reportCategoryChart').getContext('2d');
+  const catData = (await fetchData('/api/reports/category-distribution')) || [];
+  const catLabels = catData.length ? catData.map(c => c.CATEGORYNAME) : ['Gold', 'Diamond', 'Silver', 'Platinum', 'Gemstone'];
+  const catValues = catData.length ? catData.map(c => c.TOTALREVENUE) : [1850000, 1420000, 680000, 540000, 320000];
+  const bgColors = [chartColors.gold, chartColors.burgundy, chartColors.info, chartColors.muted, chartColors.warning].slice(0, catValues.length);
+
   new Chart(catCtx, {
     type: 'bar',
     data: {
-      labels: ['Gold', 'Diamond', 'Silver', 'Platinum', 'Gemstone'],
+      labels: catLabels,
       datasets: [{
         label: 'Revenue',
-        data: [1850000, 1420000, 680000, 540000, 320000],
-        backgroundColor: [chartColors.gold, chartColors.burgundy, chartColors.info, chartColors.muted, chartColors.warning],
+        data: catValues,
+        backgroundColor: bgColors,
         borderRadius: 8, borderSkipped: false, barThickness: 40,
       }]
     },

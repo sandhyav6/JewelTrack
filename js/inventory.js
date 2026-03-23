@@ -2,29 +2,36 @@
    JEWELLERY STORE — Inventory Page Logic
    ================================================================= */
 
-const inventoryItems = [
-  { id: 'JW-1001', name: 'Gold Necklace (22K)', category: 'Necklace', stock: 8, threshold: 10, supplier: 'Kalyan Suppliers', lastUpdated: '2026-03-22' },
-  { id: 'JW-1002', name: 'Diamond Solitaire Ring', category: 'Ring', stock: 5, threshold: 8, supplier: 'Tanishq Wholesale', lastUpdated: '2026-03-21' },
-  { id: 'JW-1003', name: 'Silver Bangle Set (925)', category: 'Bangle', stock: 15, threshold: 10, supplier: 'Senco Gold Supply', lastUpdated: '2026-03-20' },
-  { id: 'JW-1004', name: 'Ruby Pendant (18K)', category: 'Pendant', stock: 2, threshold: 10, supplier: 'Malabar Traders', lastUpdated: '2026-03-19' },
-  { id: 'JW-1005', name: 'Bridal Kundan Set', category: 'Bridal Set', stock: 3, threshold: 5, supplier: 'Kalyan Suppliers', lastUpdated: '2026-03-18' },
-  { id: 'JW-1006', name: 'Diamond Stud Earrings', category: 'Earring', stock: 0, threshold: 8, supplier: 'Tanishq Wholesale', lastUpdated: '2026-03-17' },
-  { id: 'JW-1007', name: 'Platinum Chain 20"', category: 'Chain', stock: 7, threshold: 6, supplier: 'PC Jeweller Dist.', lastUpdated: '2026-03-22' },
-  { id: 'JW-1008', name: 'Gold Bangles (22K, Set)', category: 'Bangle', stock: 4, threshold: 8, supplier: 'Kalyan Suppliers', lastUpdated: '2026-03-16' },
-  { id: 'JW-1009', name: 'Pearl Necklace Set', category: 'Necklace', stock: 6, threshold: 5, supplier: 'Malabar Traders', lastUpdated: '2026-03-22' },
-  { id: 'JW-1010', name: 'Silver Anklet Pair', category: 'Anklet', stock: 12, threshold: 8, supplier: 'Senco Gold Supply', lastUpdated: '2026-03-15' },
-  { id: 'JW-1011', name: 'Gemstone Cocktail Ring', category: 'Ring', stock: 0, threshold: 5, supplier: 'Malabar Traders', lastUpdated: '2026-03-14' },
-  { id: 'JW-1012', name: 'Diamond Tennis Bracelet', category: 'Bangle', stock: 2, threshold: 5, supplier: 'Tanishq Wholesale', lastUpdated: '2026-03-13' },
-];
+let inventoryItems = [];
+let stockMovements = [];
 
-const stockMovements = [
-  { text: '<strong>Gold Chain 22K</strong> — +15 units received from Kalyan Suppliers', time: '2 hours ago' },
-  { text: '<strong>Diamond Studs</strong> — -2 units sold (BL-2847)', time: '4 hours ago' },
-  { text: '<strong>Silver Bangle Set</strong> — +25 units replenished', time: 'Yesterday' },
-  { text: '<strong>Ruby Pendant 18K</strong> — Low stock alert triggered', time: 'Yesterday' },
-  { text: '<strong>Platinum Chain</strong> — +12 units received', time: '2 days ago' },
-  { text: '<strong>Diamond Stud Earrings</strong> — Out of stock alert', time: '3 days ago' },
-];
+async function loadInventoryData() {
+  const inv = await fetchData('/api/inventory');
+  if (inv) {
+    inventoryItems = inv.map(i => ({
+      id: i.ITEMID,
+      name: i.ITEMNAME,
+      category: i.CATEGORYNAME,
+      stock: i.CURRENTSTOCK || 0,
+      threshold: i.REORDERLEVEL || 5, // fallback if null
+      supplier: i.SUPPLIERNAME || 'N/A',
+      lastUpdated: i.LASTRESTOCKEDDATE
+    }));
+  }
+
+  const act = await fetchData('/api/dashboard/recent-activity');
+  if (act) {
+    stockMovements = act.map(a => ({
+      text: `<strong>${a.ACTIVITYTYPE}</strong> — Ref: ${a.REFERENCEID} | Value: ₹${(a.AMOUNT || 0).toLocaleString('en-IN')} | Party: ${a.PERSONNAME}`,
+      time: a.ACTIVITYDATE ? formatDate(a.ACTIVITYDATE) : 'Recently'
+    }));
+  }
+
+  searchInventory();
+  updateStats();
+  renderLowStockAlerts();
+  renderStockTimeline();
+}
 
 function getStockStatus(stock, threshold) {
   if (stock === 0) return 'Out of Stock';
@@ -127,8 +134,5 @@ function searchInventory() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderInventory();
-  updateStats();
-  renderLowStockAlerts();
-  renderStockTimeline();
+  loadInventoryData();
 });

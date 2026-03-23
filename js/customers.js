@@ -3,18 +3,26 @@
    ================================================================= */
 
 // ===== Customer Data =====
-let customers = [
-  { id: 'CUS-1001', name: 'Priya Sharma', phone: '+91 98765 43210', email: 'priya.sharma@email.com', address: '12 MG Road, Bangalore', totalPurchases: 24, totalSpent: 1245000, lastVisit: '2026-03-20', status: 'Preferred', category: 'Gold' },
-  { id: 'CUS-1002', name: 'Vikram Singh', phone: '+91 87654 32109', email: 'vikram.singh@email.com', address: '45 Connaught Place, Delhi', totalPurchases: 18, totalSpent: 980000, lastVisit: '2026-03-19', status: 'Preferred', category: 'Diamond' },
-  { id: 'CUS-1003', name: 'Anjali Gupta', phone: '+91 76543 21098', email: 'anjali.gupta@email.com', address: '78 Park Street, Kolkata', totalPurchases: 15, totalSpent: 567000, lastVisit: '2026-03-18', status: 'Regular', category: 'Silver' },
-  { id: 'CUS-1004', name: 'Rajesh Patel', phone: '+91 65432 10987', email: 'rajesh.patel@email.com', address: '23 SG Highway, Ahmedabad', totalPurchases: 12, totalSpent: 432000, lastVisit: '2026-03-15', status: 'Regular', category: 'Gold' },
-  { id: 'CUS-1005', name: 'Meera Iyer', phone: '+91 54321 09876', email: 'meera.iyer@email.com', address: '56 Anna Nagar, Chennai', totalPurchases: 8, totalSpent: 234000, lastVisit: '2026-03-12', status: 'Regular', category: 'Gemstone' },
-  { id: 'CUS-1006', name: 'Arjun Reddy', phone: '+91 43210 98765', email: 'arjun.reddy@email.com', address: '89 Banjara Hills, Hyderabad', totalPurchases: 6, totalSpent: 189000, lastVisit: '2026-02-28', status: 'Inactive', category: 'Platinum' },
-  { id: 'CUS-1007', name: 'Neha Kapoor', phone: '+91 32109 87654', email: 'neha.kapoor@email.com', address: '34 Juhu, Mumbai', totalPurchases: 21, totalSpent: 876000, lastVisit: '2026-03-21', status: 'Preferred', category: 'Diamond' },
-  { id: 'CUS-1008', name: 'Suresh Kumar', phone: '+91 21098 76543', email: 'suresh.kumar@email.com', address: '67 Lajpat Nagar, Delhi', totalPurchases: 4, totalSpent: 145000, lastVisit: '2026-01-15', status: 'Inactive', category: 'Gold' },
-  { id: 'CUS-1009', name: 'Kavitha Nair', phone: '+91 10987 65432', email: 'kavitha.nair@email.com', address: '11 MG Road, Kochi', totalPurchases: 10, totalSpent: 398000, lastVisit: '2026-03-16', status: 'Regular', category: 'Gold' },
-  { id: 'CUS-1010', name: 'Deepak Joshi', phone: '+91 99887 76655', email: 'deepak.joshi@email.com', address: '44 Civil Lines, Jaipur', totalPurchases: 14, totalSpent: 654000, lastVisit: '2026-03-22', status: 'Preferred', category: 'Diamond' },
-];
+let customers = [];
+
+async function loadCustomers() {
+  const raw = await fetchData('/api/customers');
+  if (raw) {
+    customers = raw.map(c => ({
+      id: c.CUSTOMERID,
+      name: c.CUSTOMERNAME,
+      phone: c.PHONE,
+      totalPurchases: c.TOTALPURCHASES,
+      totalSpent: c.TOTALSPENT,
+      lastVisit: c.LASTVISIT,
+      status: c.STATUS,
+      category: c.FAVORITECATEGORY,
+      email: '', 
+      address: ''
+    }));
+    searchCustomers();
+  }
+}
 
 // ===== Render Customer Table =====
 function renderCustomers(data) {
@@ -75,7 +83,7 @@ function filterCustomers() {
 }
 
 // ===== Save Customer (Add/Edit) =====
-function saveCustomer() {
+async function saveCustomer() {
   const name = document.getElementById('custName');
   const phone = document.getElementById('custPhone');
   let valid = true;
@@ -89,36 +97,34 @@ function saveCustomer() {
   if (!valid) return;
 
   const editId = document.getElementById('editCustomerId').value;
-  const customerData = {
+  const payload = {
     name: name.value.trim(),
-    phone: phone.value.trim(),
-    email: document.getElementById('custEmail').value.trim(),
-    address: document.getElementById('custAddress').value.trim(),
-    status: document.getElementById('custStatus').value,
-    category: document.getElementById('custCategory').value,
+    phone: phone.value.trim()
   };
 
   if (editId) {
-    const idx = customers.findIndex(c => c.id === editId);
-    if (idx > -1) {
-      customers[idx] = { ...customers[idx], ...customerData };
-      showToast('success', 'Customer Updated', `${customerData.name} has been updated successfully.`);
+    const data = await fetchData('/api/customers/' + editId, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+    if (data) {
+      showToast('success', 'Customer Updated', `${payload.name} has been updated successfully.`);
+      closeModal('addCustomerModal');
+      resetCustomerForm();
+      await loadCustomers();
     }
   } else {
-    const newCustomer = {
-      id: 'CUS-' + (1000 + customers.length + 1),
-      ...customerData,
-      totalPurchases: 0,
-      totalSpent: 0,
-      lastVisit: new Date().toISOString().split('T')[0],
-    };
-    customers.unshift(newCustomer);
-    showToast('success', 'Customer Added', `${customerData.name} has been added successfully.`);
+    const data = await fetchData('/api/customers', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (data) {
+      showToast('success', 'Customer Added', `${payload.name} has been added successfully.`);
+      closeModal('addCustomerModal');
+      resetCustomerForm();
+      await loadCustomers();
+    }
   }
-
-  closeModal('addCustomerModal');
-  resetCustomerForm();
-  renderCustomers();
 }
 
 // ===== Edit Customer =====
@@ -176,13 +182,15 @@ function viewCustomer(id) {
 }
 
 // ===== Delete Customer =====
-function deleteCustomer(id) {
+async function deleteCustomer(id) {
   const c = customers.find(x => x.id === id);
   if (!c) return;
-  showConfirmDialog('Delete Customer', `Are you sure you want to remove <strong>${c.name}</strong>? This action cannot be undone.`, () => {
-    customers = customers.filter(x => x.id !== id);
-    renderCustomers();
-    showToast('success', 'Customer Deleted', `${c.name} has been removed.`);
+  showConfirmDialog('Delete Customer', `Are you sure you want to remove <strong>${c.name}</strong>? This action cannot be undone.`, async () => {
+    const data = await fetchData('/api/customers/' + id, { method: 'DELETE' });
+    if (data) {
+      showToast('success', 'Customer Deleted', `${c.name} has been removed.`);
+      await loadCustomers();
+    }
   });
 }
 
@@ -196,7 +204,7 @@ function resetCustomerForm() {
 
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
-  renderCustomers();
+  loadCustomers();
 
   // Reset form when opening Add modal
   document.querySelector('[onclick="openModal(\'addCustomerModal\')"]').addEventListener('click', () => {

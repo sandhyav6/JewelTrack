@@ -2,16 +2,27 @@
    JEWELLERY STORE — Suppliers Page Logic
    ================================================================= */
 
-let suppliers = [
-  { id: 'SUP-101', name: 'Kalyan Suppliers', phone: '+91 98001 23456', email: 'orders@kalyan-supply.com', category: 'Gold', lastSupply: '2026-03-20', totalOrders: 145, totalValue: 12500000, status: 'Active', reliability: 'Excellent', address: '45 Zaveri Bazaar, Mumbai' },
-  { id: 'SUP-102', name: 'Tanishq Wholesale', phone: '+91 87001 23456', email: 'bulk@tanishq-ws.com', category: 'Diamond', lastSupply: '2026-03-18', totalOrders: 98, totalValue: 24800000, status: 'Active', reliability: 'Excellent', address: '12 Jewellers Street, Surat' },
-  { id: 'SUP-103', name: 'Malabar Traders', phone: '+91 76001 23456', email: 'supply@malabar-tr.com', category: 'Gold', lastSupply: '2026-03-15', totalOrders: 87, totalValue: 8900000, status: 'Active', reliability: 'Good', address: '78 MG Road, Thrissur' },
-  { id: 'SUP-104', name: 'Senco Gold Supply', phone: '+91 65001 23456', email: 'orders@senco-supply.com', category: 'Silver', lastSupply: '2026-03-10', totalOrders: 56, totalValue: 3200000, status: 'Active', reliability: 'Good', address: '34 Park Street, Kolkata' },
-  { id: 'SUP-105', name: 'PC Jeweller Dist.', phone: '+91 54001 23456', email: 'dist@pcjeweller.com', category: 'Platinum', lastSupply: '2026-03-05', totalOrders: 34, totalValue: 6700000, status: 'Active', reliability: 'Average', address: '23 Connaught Place, Delhi' },
-  { id: 'SUP-106', name: 'Joyalukkas Gems', phone: '+91 43001 23456', email: 'gems@joyalukkas.com', category: 'Gemstone', lastSupply: '2026-02-28', totalOrders: 42, totalValue: 5400000, status: 'Active', reliability: 'Excellent', address: '56 Anna Nagar, Chennai' },
-  { id: 'SUP-107', name: 'Bhima Gold House', phone: '+91 32001 23456', email: 'supply@bhima.com', category: 'Gold', lastSupply: '2026-01-20', totalOrders: 23, totalValue: 4100000, status: 'Inactive', reliability: 'Good', address: '89 Mahatma Gandhi Rd, Kochi' },
-  { id: 'SUP-108', name: 'GRT Diamonds', phone: '+91 21001 23456', email: 'grt@diamonds.com', category: 'Diamond', lastSupply: '2026-03-22', totalOrders: 67, totalValue: 18900000, status: 'Active', reliability: 'Excellent', address: '11 T Nagar, Chennai' },
-];
+let suppliers = [];
+
+async function loadSuppliers() {
+  const raw = await fetchData('/api/suppliers');
+  if (raw) {
+    suppliers = raw.map(s => ({
+      id: s.SUPPLIERID,
+      name: s.SUPPLIERNAME,
+      phone: s.SUPPLIERPHONE,
+      lastSupply: s.LASTSUPPLY,
+      totalOrders: s.TOTALORDERS,
+      totalValue: s.TOTALVALUE,
+      status: s.STATUS,
+      category: s.SUPPLYCATEGORY || 'General',
+      email: '',
+      reliability: 95, 
+      address: ''
+    }));
+    searchSuppliers();
+  }
+}
 
 function renderSuppliers(data) {
   if (!data) data = suppliers;
@@ -55,7 +66,7 @@ function searchSuppliers() {
   renderSuppliers(filtered);
 }
 
-function saveSupplier() {
+async function saveSupplier() {
   const name = document.getElementById('supName');
   const phone = document.getElementById('supPhone');
   let valid = true;
@@ -64,26 +75,36 @@ function saveSupplier() {
   if (!valid) return;
 
   const editId = document.getElementById('editSupplierId').value;
-  const data = {
-    name: name.value.trim(), phone: phone.value.trim(),
-    email: document.getElementById('supEmail').value.trim(),
-    category: document.getElementById('supCategory').value,
-    status: document.getElementById('supStatus').value,
-    reliability: document.getElementById('supReliability').value,
-    address: document.getElementById('supAddress').value.trim(),
+  const payload = {
+    name: name.value.trim(), 
+    phone: phone.value.trim()
   };
 
   if (editId) {
-    const idx = suppliers.findIndex(s => s.id === editId);
-    if (idx > -1) { suppliers[idx] = { ...suppliers[idx], ...data }; showToast('success', 'Supplier Updated', `${data.name} updated.`); }
+    const data = await fetchData('/api/suppliers/' + editId, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+    if (data) {
+      showToast('success', 'Supplier Updated', `${payload.name} updated.`);
+      closeModal('addSupplierModal');
+      document.getElementById('supplierForm').reset();
+      document.getElementById('editSupplierId').value = '';
+      await loadSuppliers();
+    }
   } else {
-    suppliers.unshift({ id: 'SUP-' + (100 + suppliers.length + 1), ...data, lastSupply: new Date().toISOString().split('T')[0], totalOrders: 0, totalValue: 0 });
-    showToast('success', 'Supplier Added', `${data.name} added successfully.`);
+    const data = await fetchData('/api/suppliers', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (data) {
+      showToast('success', 'Supplier Added', `${payload.name} added successfully.`);
+      closeModal('addSupplierModal');
+      document.getElementById('supplierForm').reset();
+      document.getElementById('editSupplierId').value = '';
+      await loadSuppliers();
+    }
   }
-  closeModal('addSupplierModal');
-  document.getElementById('supplierForm').reset();
-  document.getElementById('editSupplierId').value = '';
-  renderSuppliers();
 }
 
 function editSupplier(id) {
@@ -131,10 +152,12 @@ function viewSupplier(id) {
 function deleteSupplier(id) {
   const s = suppliers.find(x => x.id === id);
   if (!s) return;
-  showConfirmDialog('Delete Supplier', `Remove <strong>${s.name}</strong>? This cannot be undone.`, () => {
-    suppliers = suppliers.filter(x => x.id !== id);
-    renderSuppliers();
-    showToast('success', 'Supplier Deleted', `${s.name} removed.`);
+  showConfirmDialog('Delete Supplier', `Remove <strong>${s.name}</strong>? This cannot be undone.`, async () => {
+    const data = await fetchData('/api/suppliers/' + id, { method: 'DELETE' });
+    if (data) {
+      showToast('success', 'Supplier Deleted', `${s.name} removed.`);
+      await loadSuppliers();
+    }
   });
 }
 
@@ -146,4 +169,4 @@ function openAddSupplier() {
   openModal('addSupplierModal');
 }
 
-document.addEventListener('DOMContentLoaded', () => { renderSuppliers(); });
+document.addEventListener('DOMContentLoaded', () => { loadSuppliers(); });

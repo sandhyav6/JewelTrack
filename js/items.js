@@ -2,21 +2,57 @@
    JEWELLERY STORE — Jewellery Items Page Logic
    ================================================================= */
 
-// ===== Items Data =====
-let items = [
-  { id: 'JW-1001', name: 'Gold Necklace (22K)', category: 'Necklace', material: 'Gold', weight: 24.5, price: 147000, stock: 8, supplier: 'Kalyan Suppliers', description: 'Elegant 22K gold necklace with traditional design', status: 'In Stock' },
-  { id: 'JW-1002', name: 'Diamond Solitaire Ring', category: 'Ring', material: 'Diamond', weight: 4.2, price: 285000, stock: 5, supplier: 'Tanishq Wholesale', description: '1.5 carat solitaire diamond ring in platinum setting', status: 'In Stock' },
-  { id: 'JW-1003', name: 'Silver Bangle Set (925)', category: 'Bangle', material: 'Silver', weight: 45.0, price: 12800, stock: 15, supplier: 'Senco Gold Supply', description: 'Set of 4 sterling silver bangles', status: 'In Stock' },
-  { id: 'JW-1004', name: 'Ruby Pendant (18K)', category: 'Pendant', material: 'Gold', weight: 6.8, price: 34200, stock: 2, supplier: 'Malabar Traders', description: '18K gold pendant with natural Burmese ruby', status: 'Low Stock' },
-  { id: 'JW-1005', name: 'Bridal Kundan Set', category: 'Bridal Set', material: 'Gold', weight: 85.0, price: 425000, stock: 3, supplier: 'Kalyan Suppliers', description: 'Complete bridal set with necklace, earrings, maang tikka, and bangles', status: 'Low Stock' },
-  { id: 'JW-1006', name: 'Diamond Stud Earrings', category: 'Earring', material: 'Diamond', weight: 3.5, price: 67800, stock: 0, supplier: 'Tanishq Wholesale', description: 'Classic diamond stud earrings, 0.5 carat each', status: 'Out of Stock' },
-  { id: 'JW-1007', name: 'Platinum Chain 20"', category: 'Chain', material: 'Platinum', weight: 12.0, price: 98500, stock: 7, supplier: 'PC Jeweller Dist.', description: '20 inch platinum chain with secure clasp', status: 'In Stock' },
-  { id: 'JW-1008', name: 'Gold Bangles (22K, Set)', category: 'Bangle', material: 'Gold', weight: 32.0, price: 192000, stock: 4, supplier: 'Kalyan Suppliers', description: 'Set of 2 hand-carved 22K gold bangles', status: 'Low Stock' },
-  { id: 'JW-1009', name: 'Pearl Necklace Set', category: 'Necklace', material: 'Gold', weight: 18.5, price: 56000, stock: 6, supplier: 'Malabar Traders', description: 'Freshwater pearl necklace with 18K gold clasp', status: 'In Stock' },
-  { id: 'JW-1010', name: 'Silver Anklet Pair', category: 'Anklet', material: 'Silver', weight: 20.0, price: 4500, stock: 12, supplier: 'Senco Gold Supply', description: 'Traditional silver anklets with ghungroo', status: 'In Stock' },
-  { id: 'JW-1011', name: 'Gemstone Cocktail Ring', category: 'Ring', material: 'Gold', weight: 8.5, price: 42000, stock: 0, supplier: 'Malabar Traders', description: 'Multi-gemstone ring with emerald, sapphire, and rubies', status: 'Out of Stock' },
-  { id: 'JW-1012', name: 'Diamond Tennis Bracelet', category: 'Bangle', material: 'Diamond', weight: 14.0, price: 345000, stock: 2, supplier: 'Tanishq Wholesale', description: '3 carat total weight diamond tennis bracelet in 18K white gold', status: 'Low Stock' },
-];
+let items = [];
+let categoriesList = [];
+let suppliersList = [];
+
+async function loadDropdowns() {
+  const [cats, sups] = await Promise.all([
+    fetchData('/api/categories'),
+    fetchData('/api/suppliers')
+  ]);
+  
+  if (cats) {
+    categoriesList = cats;
+    const catSelect = document.getElementById('itemCategory');
+    const filterCat = document.getElementById('filterCategory');
+    if (catSelect) {
+      catSelect.innerHTML = '<option value="">Select Category</option>' + cats.map(c => `<option value="${c.CATEGORYID}">${c.CATEGORYNAME}</option>`).join('');
+    }
+    if (filterCat) {
+      filterCat.innerHTML = '<option value="all">All Categories</option>' + cats.map(c => `<option value="${c.CATEGORYNAME}">${c.CATEGORYNAME}</option>`).join('');
+    }
+  }
+  
+  if (sups) {
+    suppliersList = sups;
+    const supSelect = document.getElementById('itemSupplier');
+    if (supSelect) {
+      supSelect.innerHTML = '<option value="">Select Supplier</option>' + sups.map(s => `<option value="${s.SUPPLIERID}">${s.SUPPLIERNAME}</option>`).join('');
+    }
+  }
+}
+
+async function loadItems() {
+  const raw = await fetchData('/api/items');
+  if (raw) {
+    items = raw.map(i => ({
+      id: i.ITEMID,
+      name: i.ITEMNAME,
+      categoryId: i.CATEGORYID,
+      category: i.CATEGORYNAME || 'Unknown',
+      material: i.MATERIAL || '',
+      weight: i.WEIGHT || 0,
+      price: i.BASEPRICE || 0,
+      stock: i.CURRENTSTOCK || 0,
+      supplierId: i.SUPPLIERID,
+      supplier: i.SUPPLIERNAME || 'N/A',
+      description: i.DESCRIPTION || '',
+      status: getStockStatus(i.CURRENTSTOCK || 0)
+    }));
+    filterItems();
+  }
+}
 
 let currentView = 'card';
 
@@ -144,7 +180,7 @@ function filterItems() {
 }
 
 // ===== Save Item =====
-function saveItem() {
+async function saveItem() {
   const name = document.getElementById('itemName');
   const category = document.getElementById('itemCategory');
   const material = document.getElementById('itemMaterial');
@@ -160,29 +196,40 @@ function saveItem() {
   if (!valid) return;
 
   const editId = document.getElementById('editItemId').value;
-  const itemData = {
+  const payload = {
     name: name.value.trim(),
-    category: category.value,
+    categoryId: category.value,
     material: material.value,
-    weight: parseFloat(document.getElementById('itemWeight').value) || 0,
-    price: parseFloat(price.value),
+    weight: parseFloat(document.getElementById('itemWeight').value) || null,
+    basePrice: parseFloat(price.value),
     stock: parseInt(stock.value),
-    supplier: document.getElementById('itemSupplier').value,
-    description: document.getElementById('itemDesc').value.trim(),
+    supplierId: document.getElementById('itemSupplier').value || null,
+    description: document.getElementById('itemDesc').value.trim() || null,
   };
-  itemData.status = getStockStatus(itemData.stock);
 
   if (editId) {
-    const idx = items.findIndex(i => i.id === editId);
-    if (idx > -1) { items[idx] = { ...items[idx], ...itemData }; showToast('success', 'Item Updated', `${itemData.name} updated successfully.`); }
+    const data = await fetchData('/api/items/' + editId, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+    if (data) {
+      showToast('success', 'Item Updated', `${payload.name} updated successfully.`);
+      closeModal('addItemModal');
+      resetItemForm();
+      await loadItems();
+    }
   } else {
-    items.unshift({ id: 'JW-' + (1000 + items.length + 1), ...itemData });
-    showToast('success', 'Item Added', `${itemData.name} has been added to inventory.`);
+    const data = await fetchData('/api/items', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (data) {
+      showToast('success', 'Item Added', `${payload.name} has been added to inventory.`);
+      closeModal('addItemModal');
+      resetItemForm();
+      await loadItems();
+    }
   }
-
-  closeModal('addItemModal');
-  resetItemForm();
-  renderItems();
 }
 
 // ===== Edit Item =====
@@ -192,12 +239,12 @@ function editItem(id) {
   document.getElementById('itemModalTitle').textContent = 'Edit Item';
   document.getElementById('editItemId').value = item.id;
   document.getElementById('itemName').value = item.name;
-  document.getElementById('itemCategory').value = item.category;
+  document.getElementById('itemCategory').value = item.categoryId;
   document.getElementById('itemMaterial').value = item.material;
-  document.getElementById('itemWeight').value = item.weight;
+  document.getElementById('itemWeight').value = item.weight || '';
   document.getElementById('itemPrice').value = item.price;
   document.getElementById('itemStock').value = item.stock;
-  document.getElementById('itemSupplier').value = item.supplier;
+  document.getElementById('itemSupplier').value = item.supplierId || '';
   document.getElementById('itemDesc').value = item.description || '';
   openModal('addItemModal');
 }
@@ -233,13 +280,15 @@ function viewItem(id) {
 }
 
 // ===== Delete Item =====
-function deleteItem(id) {
+async function deleteItem(id) {
   const item = items.find(i => i.id === id);
   if (!item) return;
-  showConfirmDialog('Delete Item', `Are you sure you want to remove <strong>${item.name}</strong>? This action cannot be undone.`, () => {
-    items = items.filter(i => i.id !== id);
-    renderItems();
-    showToast('success', 'Item Deleted', `${item.name} has been removed.`);
+  showConfirmDialog('Delete Item', `Are you sure you want to remove <strong>${item.name}</strong>? This action cannot be undone.`, async () => {
+    const data = await fetchData('/api/items/' + id, { method: 'DELETE' });
+    if (data) {
+      showToast('success', 'Item Deleted', `${item.name} has been removed.`);
+      await loadItems();
+    }
   });
 }
 
@@ -257,6 +306,7 @@ function resetItemForm() {
 }
 
 // ===== Initialize =====
-document.addEventListener('DOMContentLoaded', () => {
-  renderItems();
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadDropdowns();
+  await loadItems();
 });
