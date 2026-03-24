@@ -9,14 +9,23 @@ const { createPurchase }   = require('../services/purchases.service');
 exports.getAll = asyncHandler(async (req, res) => {
   const sql = `
     SELECT PURCHASEID, PURCHASEDATE, SUPPLIERNAME,
-           SUM(LINEAMOUNT) AS TOTALVALUE,
-           SUM(QUANTITY)   AS TOTALQTY
+           SUM(LINEAMOUNT) AS TOTALAMOUNT,
+           SUM(QUANTITY)   AS TOTALITEMS,
+           LISTAGG(ITEMNAME, ', ') WITHIN GROUP (ORDER BY ITEMNAME) AS ITEMS
     FROM V_PURCHASE_DETAIL
     GROUP BY PURCHASEID, PURCHASEDATE, SUPPLIERNAME
     ORDER BY PURCHASEDATE DESC
   `;
   const result = await query(sql);
-  res.json({ success: true, data: result.rows });
+  const data = result.rows.map(r => ({
+    PURCHASEID: r.PURCHASEID,
+    PURCHASEDATE: r.PURCHASEDATE,
+    SUPPLIERNAME: r.SUPPLIERNAME,
+    TOTALAMOUNT: Number(r.TOTALAMOUNT),
+    TOTALITEMS: Number(r.TOTALITEMS),
+    ITEMS: r.ITEMS
+  }));
+  res.json({ success: true, data });
 });
 
 // GET /api/purchases/:id

@@ -1,11 +1,24 @@
 'use strict';
-const { query }    = require('../config/db');
+const { query } = require('../config/db');
 const asyncHandler = require('../utils/asyncHandler');
 
 const INVENTORY_SQL = `
-  SELECT ITEMID, ITEMNAME, CATEGORYID, CATEGORYNAME, MATERIAL, WEIGHT, PRICE,
-         AVAILABLEQUANTITY, STOCKSTATUS, RECENTSUPPLIER
-  FROM V_INVENTORY ORDER BY ITEMNAME
+  SELECT
+    ITEMID,
+    ITEMNAME,
+    CATEGORYID,
+    CATEGORYNAME,
+    MATERIAL,
+    WEIGHT,
+    PRICE AS BASEPRICE,
+    AVAILABLEQUANTITY AS CURRENTSTOCK,
+    STOCKSTATUS,
+    RECENTSUPPLIER AS SUPPLIERNAME,
+    5 AS REORDERLEVEL,
+    NULL AS LASTRESTOCKEDDATE,
+    '' AS DESCRIPTION
+  FROM V_INVENTORY
+  ORDER BY ITEMNAME
 `;
 
 // GET /api/inventory
@@ -14,10 +27,21 @@ exports.getAll = asyncHandler(async (req, res) => {
   res.json({ success: true, data: result.rows });
 });
 
-// GET /api/inventory/low-stock  (items with qty <= 5)
+// GET /api/inventory/low-stock
 exports.getLowStock = asyncHandler(async (req, res) => {
   const sql = `
-    SELECT ITEMID, ITEMNAME, CATEGORYNAME, MATERIAL, AVAILABLEQUANTITY, STOCKSTATUS, RECENTSUPPLIER
+    SELECT
+      ITEMID,
+      ITEMNAME,
+      CATEGORYNAME,
+      MATERIAL,
+      PRICE AS BASEPRICE,
+      AVAILABLEQUANTITY AS CURRENTSTOCK,
+      STOCKSTATUS,
+      RECENTSUPPLIER AS SUPPLIERNAME,
+      5 AS REORDERLEVEL,
+      NULL AS LASTRESTOCKEDDATE,
+      '' AS DESCRIPTION
     FROM V_INVENTORY
     WHERE AVAILABLEQUANTITY <= 5
     ORDER BY AVAILABLEQUANTITY ASC
