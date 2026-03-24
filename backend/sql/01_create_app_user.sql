@@ -2,6 +2,7 @@
 -- JewelTrack: Step 1 - Create Application User
 -- Run this from a SYSDBA session in CMD or Oracle admin shell
 -- Example: sqlplus / as sysdba @01_create_app_user.sql
+-- IMPORTANT: Run this inside the correct PDB (for example XEPDB1), not CDB$ROOT
 -- ===========================================================
 
 -- Drop if exists (safe re-run)
@@ -23,13 +24,13 @@ CREATE USER JEWELTRACK_APP IDENTIFIED BY "JewelTrack@2024"
 ALTER USER JEWELTRACK_APP QUOTA UNLIMITED ON USERS;
 
 -- Required privileges for the application
-GRANT CREATE SESSION      TO JEWELTRACK_APP;
-GRANT CREATE TABLE        TO JEWELTRACK_APP;
-GRANT CREATE VIEW         TO JEWELTRACK_APP;
-GRANT CREATE SEQUENCE     TO JEWELTRACK_APP;
-GRANT CREATE TRIGGER      TO JEWELTRACK_APP;
-GRANT CREATE PROCEDURE    TO JEWELTRACK_APP;
-GRANT SELECT ANY DICTIONARY TO JEWELTRACK_APP;
+GRANT CREATE SESSION         TO JEWELTRACK_APP;
+GRANT CREATE TABLE           TO JEWELTRACK_APP;
+GRANT CREATE VIEW            TO JEWELTRACK_APP;
+GRANT CREATE SEQUENCE        TO JEWELTRACK_APP;
+GRANT CREATE TRIGGER         TO JEWELTRACK_APP;
+GRANT CREATE PROCEDURE       TO JEWELTRACK_APP;
+GRANT SELECT ANY DICTIONARY  TO JEWELTRACK_APP;
 
 -- Allow the application to use the Oracle connection pool
 GRANT ALTER SESSION TO JEWELTRACK_APP;

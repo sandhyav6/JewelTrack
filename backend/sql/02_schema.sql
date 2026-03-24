@@ -1,7 +1,10 @@
 -- ===========================================================
 -- JewelTrack: Step 2 - Create Schema
 -- Run as JEWELTRACK_APP user
--- Example: sqlplus JEWELTRACK_APP/JewelTrack@2024@localhost:1521/XEPDB1 @02_schema.sql
+-- Example:
+-- CONNECT JEWELTRACK_APP/"JewelTrack@2024"@"(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=xepdb1)))"
+-- Then run:
+-- @02_schema.sql
 -- ===========================================================
 
 -- Drop tables in reverse FK order (safe re-run)
@@ -97,8 +100,8 @@ CREATE TABLE BILL (
 -- BILL_ITEM
 -- ============================================================
 CREATE TABLE BILL_ITEM (
-  BILLNO   VARCHAR2(20) NOT NULL,
-  ITEMID   VARCHAR2(20) NOT NULL,
+  BILLNO   VARCHAR2(20)  NOT NULL,
+  ITEMID   VARCHAR2(20)  NOT NULL,
   QUANTITY NUMBER(10, 0) NOT NULL,
   CONSTRAINT PK_BILL_ITEM PRIMARY KEY (BILLNO, ITEMID),
   CONSTRAINT FK_BILLITEM_BILL FOREIGN KEY (BILLNO)

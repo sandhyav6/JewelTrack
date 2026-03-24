@@ -50,21 +50,21 @@ INSERT INTO CUSTOMER VALUES ('CUS-1010', 'Deepak Joshi',  '+91 99887 76655');
 -- ============================================================
 -- ITEMS (12 rows)
 -- ============================================================
-INSERT INTO ITEM VALUES ('JW-1001', 'Gold Necklace (22K)',        'CAT-101', 'Gold',     24.5,  147000, 8);
-INSERT INTO ITEM VALUES ('JW-1002', 'Diamond Solitaire Ring',     'CAT-102', 'Diamond',   4.2,  285000, 5);
-INSERT INTO ITEM VALUES ('JW-1003', 'Silver Bangle Set (925)',    'CAT-103', 'Silver',   45.0,   12800, 15);
-INSERT INTO ITEM VALUES ('JW-1004', 'Ruby Pendant (18K)',         'CAT-105', 'Gold',      6.8,   34200, 2);
-INSERT INTO ITEM VALUES ('JW-1005', 'Bridal Kundan Set',          'CAT-101', 'Gold',     85.0,  425000, 3);
-INSERT INTO ITEM VALUES ('JW-1006', 'Diamond Stud Earrings',      'CAT-102', 'Diamond',   3.5,   67800, 0);
-INSERT INTO ITEM VALUES ('JW-1007', 'Platinum Chain 20"',         'CAT-104', 'Platinum', 12.0,   98500, 7);
-INSERT INTO ITEM VALUES ('JW-1008', 'Gold Bangles (22K, Set)',    'CAT-101', 'Gold',     32.0,  192000, 4);
-INSERT INTO ITEM VALUES ('JW-1009', 'Pearl Necklace Set',         'CAT-106', 'Gold',     18.5,   56000, 6);
-INSERT INTO ITEM VALUES ('JW-1010', 'Silver Anklet Pair',         'CAT-103', 'Silver',   20.0,    4500, 12);
-INSERT INTO ITEM VALUES ('JW-1011', 'Gemstone Cocktail Ring',     'CAT-105', 'Gold',      8.5,   42000, 0);
-INSERT INTO ITEM VALUES ('JW-1012', 'Diamond Tennis Bracelet',    'CAT-102', 'Diamond',  14.0,  345000, 2);
+INSERT INTO ITEM VALUES ('JW-1001', 'Gold Necklace (22K)',        'CAT-101', 'Gold',     24.5, 147000, 8);
+INSERT INTO ITEM VALUES ('JW-1002', 'Diamond Solitaire Ring',     'CAT-102', 'Diamond',   4.2, 285000, 5);
+INSERT INTO ITEM VALUES ('JW-1003', 'Silver Bangle Set (925)',    'CAT-103', 'Silver',   45.0,  12800, 15);
+INSERT INTO ITEM VALUES ('JW-1004', 'Ruby Pendant (18K)',         'CAT-105', 'Gold',      6.8,  34200, 2);
+INSERT INTO ITEM VALUES ('JW-1005', 'Bridal Kundan Set',          'CAT-101', 'Gold',     85.0, 425000, 3);
+INSERT INTO ITEM VALUES ('JW-1006', 'Diamond Stud Earrings',      'CAT-102', 'Diamond',   3.5,  67800, 0);
+INSERT INTO ITEM VALUES ('JW-1007', 'Platinum Chain 20"',         'CAT-104', 'Platinum', 12.0,  98500, 7);
+INSERT INTO ITEM VALUES ('JW-1008', 'Gold Bangles (22K, Set)',    'CAT-101', 'Gold',     32.0, 192000, 4);
+INSERT INTO ITEM VALUES ('JW-1009', 'Pearl Necklace Set',         'CAT-106', 'Gold',     18.5,  56000, 6);
+INSERT INTO ITEM VALUES ('JW-1010', 'Silver Anklet Pair',         'CAT-103', 'Silver',   20.0,   4500, 12);
+INSERT INTO ITEM VALUES ('JW-1011', 'Gemstone Cocktail Ring',     'CAT-105', 'Gold',      8.5,  42000, 0);
+INSERT INTO ITEM VALUES ('JW-1012', 'Diamond Tennis Bracelet',    'CAT-102', 'Diamond',  14.0, 345000, 2);
 
 -- ============================================================
--- PURCHASES (10 rows) - dates spread over 90 days
+-- PURCHASES (10 rows)
 -- ============================================================
 INSERT INTO PURCHASE VALUES ('PO-1201', DATE '2026-03-22', 'SUP-101');
 INSERT INTO PURCHASE VALUES ('PO-1202', DATE '2026-03-20', 'SUP-102');
@@ -78,7 +78,7 @@ INSERT INTO PURCHASE VALUES ('PO-1209', DATE '2026-03-02', 'SUP-102');
 INSERT INTO PURCHASE VALUES ('PO-1210', DATE '2026-02-28', 'SUP-103');
 
 -- ============================================================
--- PURCHASE_ITEMS (linked to purchases + items)
+-- PURCHASE_ITEMS
 -- ============================================================
 INSERT INTO PURCHASE_ITEM VALUES ('PO-1201', 'JW-1001', 15, 125000);
 INSERT INTO PURCHASE_ITEM VALUES ('PO-1202', 'JW-1002', 10,  52000);
@@ -97,7 +97,7 @@ INSERT INTO PURCHASE_ITEM VALUES ('PO-1210', 'JW-1009', 10,  42000);
 INSERT INTO PURCHASE_ITEM VALUES ('PO-1210', 'JW-1004',  5,  28000);
 
 -- ============================================================
--- BILLS (10 rows across multiple dates)
+-- BILLS (10 rows)
 -- ============================================================
 INSERT INTO BILL VALUES ('BL-2838', DATE '2026-03-01', 'CUS-1003', 'EMP-101');
 INSERT INTO BILL VALUES ('BL-2839', DATE '2026-03-05', 'CUS-1008', 'EMP-102');
@@ -111,7 +111,7 @@ INSERT INTO BILL VALUES ('BL-2846', DATE '2026-03-20', 'CUS-1004', 'EMP-101');
 INSERT INTO BILL VALUES ('BL-2847', DATE '2026-03-22', 'CUS-1001', 'EMP-102');
 
 -- ============================================================
--- BILL_ITEMS (linked to bills + items)
+-- BILL_ITEMS
 -- ============================================================
 INSERT INTO BILL_ITEM VALUES ('BL-2838', 'JW-1003', 1);
 INSERT INTO BILL_ITEM VALUES ('BL-2839', 'JW-1010', 2);
