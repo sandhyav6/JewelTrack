@@ -3,121 +3,127 @@ const { query } = require('../config/db');
 
 /**
  * Dashboard summary statistics.
+ * Returns keys expected by frontend.
  */
 async function getSummary() {
   const sql = `
     SELECT
-      (SELECT COUNT(*) FROM CUSTOMER) AS TOTALCUSTOMERS,
-      (SELECT COUNT(*) FROM ITEM)     AS TOTALITEMS,
-      (SELECT COUNT(*) FROM SUPPLIER) AS TOTALSUPPLIERS,
-      (SELECT COUNT(*) FROM ITEM WHERE AVAILABLEQUANTITY <= 5) AS LOWSTOCKCOUNT
+      NVL((SELECT SUM(LINEAMOUNT) FROM V_BILL_DETAIL), 0) AS TOTALREVENUE,
+      (SELECT COUNT(*) FROM BILL) AS TOTALORDERS,
+      0 AS NEWCUSTOMERS,
+      (SELECT COUNT(*) FROM ITEM WHERE AVAILABLEQUANTITY <= 5) AS LOWSTOCKITEMS
     FROM DUAL
   `;
   const result = await query(sql);
-  const row = result.rows[0];
-  return {
-    totalCustomers: Number(row.TOTALCUSTOMERS),
-    totalItems:     Number(row.TOTALITEMS),
-    totalSuppliers: Number(row.TOTALSUPPLIERS),
-    lowStockCount:  Number(row.LOWSTOCKCOUNT),
-  };
+  return result.rows[0];
 }
 
 /**
  * Recent sales — last 6 bills with totals.
+ * Returns keys expected by frontend.
  */
 async function getRecentSales() {
   const sql = `
     SELECT * FROM (
       SELECT
-        BD.BILLNO,
+        BD.BILLNO AS REFERENCENO,
         BD.BILLDATE,
         BD.CUSTOMERNAME,
-        SUM(BD.LINEAMOUNT) AS TOTALAMOUNT
+        LISTAGG(BD.ITEMNAME, ', ') WITHIN GROUP (ORDER BY BD.ITEMNAME) AS ITEMS,
+        SUM(BD.LINEAMOUNT) AS TOTALAMOUNT,
+        'Paid' AS STATUS
       FROM V_BILL_DETAIL BD
       GROUP BY BD.BILLNO, BD.BILLDATE, BD.CUSTOMERNAME
       ORDER BY BD.BILLDATE DESC
-    ) WHERE ROWNUM <= 6
+    )
+    WHERE ROWNUM <= 6
   `;
   const result = await query(sql);
-  return result.rows.map(r => ({
-    bill:     r.BILLNO,
-    customer: r.CUSTOMERNAME,
-    amount:   Number(r.TOTALAMOUNT),
-    date:     r.BILLDATE,
-  }));
+  return result.rows;
 }
 
 /**
- * Low stock items (AvailableQuantity <= 5).
+ * Low stock items.
+ * Returns keys expected by frontend.
  */
 async function getLowStock() {
   const sql = `
-    SELECT ITEMID, ITEMNAME, AVAILABLEQUANTITY, STOCKSTATUS
+    SELECT
+      ITEMID,
+      ITEMNAME,
+      AVAILABLEQUANTITY AS CURRENTSTOCK,
+      5 AS REORDERLEVEL
     FROM V_INVENTORY
     WHERE AVAILABLEQUANTITY <= 5
     ORDER BY AVAILABLEQUANTITY ASC
     FETCH FIRST 8 ROWS ONLY
   `;
   const result = await query(sql);
-  return result.rows.map(r => ({
-    id:        r.ITEMID,
-    name:      r.ITEMNAME,
-    stock:     Number(r.AVAILABLEQUANTITY),
-    status:    r.STOCKSTATUS,
-  }));
+  return result.rows;
 }
 
 /**
  * Top customers by total spent.
+ * Returns keys expected by frontend.
  */
 async function getTopCustomers() {
   const sql = `
     SELECT * FROM (
       SELECT
-        CUSTOMERID, CUSTOMERNAME, TOTALPURCHASES, TOTALSPENT
+        CUSTOMERID,
+        CUSTOMERNAME,
+        TOTALPURCHASES AS TOTALBILLS,
+        TOTALSPENT
       FROM V_CUSTOMER_STATS
       WHERE TOTALSPENT > 0
       ORDER BY TOTALSPENT DESC
-    ) WHERE ROWNUM <= 5
+    )
+    WHERE ROWNUM <= 5
   `;
   const result = await query(sql);
-  return result.rows.map(r => ({
-    id:         r.CUSTOMERID,
-    name:       r.CUSTOMERNAME,
-    purchases:  Number(r.TOTALPURCHASES),
-    spent:      Number(r.TOTALSPENT),
-  }));
+  return result.rows;
 }
 
 /**
- * Recent activity: last 6 bills + last 6 purchases merged and sorted by date.
+ * Recent activity.
+ * Returns keys expected by inventory/dashboard frontend.
  */
 async function getRecentActivity() {
   const billSql = `
-    SELECT
-      'Bill ' || BILLNO || ' placed for ' || CUSTOMERNAME AS ACTTEXT,
-      BILLDATE AS ACTDATE
-    FROM (
-      SELECT DISTINCT BILLNO, CUSTOMERNAME, BILLDATE FROM V_BILL_DETAIL
+    SELECT * FROM (
+      SELECT
+        'Bill' AS ACTIVITYTYPE,
+        BILLNO AS REFERENCEID,
+        SUM(LINEAMOUNT) AS AMOUNT,
+        CUSTOMERNAME AS PERSONNAME,
+        BILLDATE AS ACTIVITYDATE
+      FROM V_BILL_DETAIL
+      GROUP BY BILLNO, CUSTOMERNAME, BILLDATE
       ORDER BY BILLDATE DESC
-    ) WHERE ROWNUM <= 6
+    )
+    WHERE ROWNUM <= 6
   `;
+
   const purSql = `
-    SELECT
-      'Purchase ' || PURCHASEID || ' from ' || SUPPLIERNAME AS ACTTEXT,
-      PURCHASEDATE AS ACTDATE
-    FROM (
-      SELECT DISTINCT PURCHASEID, SUPPLIERNAME, PURCHASEDATE FROM V_PURCHASE_DETAIL
+    SELECT * FROM (
+      SELECT
+        'Purchase' AS ACTIVITYTYPE,
+        PURCHASEID AS REFERENCEID,
+        SUM(LINEAMOUNT) AS AMOUNT,
+        SUPPLIERNAME AS PERSONNAME,
+        PURCHASEDATE AS ACTIVITYDATE
+      FROM V_PURCHASE_DETAIL
+      GROUP BY PURCHASEID, SUPPLIERNAME, PURCHASEDATE
       ORDER BY PURCHASEDATE DESC
-    ) WHERE ROWNUM <= 4
+    )
+    WHERE ROWNUM <= 4
   `;
-  const [bills, purs] = await Promise.all([query(billSql), query(purSql)]);
-  const combined = [
-    ...bills.rows.map(r => ({ text: r.ACTTEXT, date: r.ACTDATE })),
-    ...purs.rows.map(r => ({ text: r.ACTTEXT, date: r.ACTDATE })),
-  ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
-  return combined;
+
+  const [bills, purchases] = await Promise.all([query(billSql), query(purSql)]);
+
+  return [...bills.rows, ...purchases.rows]
+    .sort((a, b) => new Date(b.ACTIVITYDATE) - new Date(a.ACTIVITYDATE))
+    .slice(0, 8);
 }
 
 module.exports = {
