@@ -1,7 +1,8 @@
 node_modules/
+
 .env
-.env.*
-dist/
-build/
-coverage/
-*.log
+.env.local
+.env.development
+.env.production
+
+!.env.example
