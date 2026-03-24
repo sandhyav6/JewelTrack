@@ -273,6 +273,32 @@ function validateEmail(input) {
   return true;
 }
 
+const API_BASE = 'http://localhost:3000';
+
+async function fetchData(url, options = {}) {
+  try {
+    const response = await fetch(API_BASE + url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      },
+      ...options
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || result.message || `Request failed: ${response.status}`);
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error('API Error:', error);
+    showToast('error', 'Server Error', 'Failed to connect to server.');
+    return null;
+  }
+}
+
 // ===== Utility: Format Currency (INR) =====
 function formatCurrency(amount) {
   return '₹' + Number(amount).toLocaleString('en-IN');
