@@ -1,4 +1,4 @@
-# 💎 JewelTrack
+# JewelTrack
 
 A premium, fully functional frontend dashboard designed to streamline jewellery store operations.
 This system provides an elegant and interactive interface for managing customers, inventory, suppliers, billing, purchases, and reports — all in one place.
@@ -7,23 +7,23 @@ Built using **HTML, CSS, and Vanilla JavaScript**, the project focuses on combin
 
 ---
 
-## ✨ Features
+## Features
 
-### 📊 Dashboard
+### Dashboard
 
 * Real-time analytics and summary cards
 * Sales overview and revenue charts
 * Low stock alerts and activity timeline
 * Top customers and recent sales tracking
 
-### 👥 Customer Management
+### Customer Management
 
 * Add, edit, delete customers
 * Search and filter customers
 * Detailed customer profile view
 * Purchase history and status classification (Preferred, Regular, Inactive)
 
-### 💍 Jewellery Inventory
+### Jewellery Inventory
 
 * Dual view: Card layout & Table view
 * Filter by category, material, and stock status
@@ -40,35 +40,35 @@ Built using **HTML, CSS, and Vanilla JavaScript**, the project focuses on combin
 * Payment mode selection
 * Bill confirmation modal
 
-### 📦 Purchases
+### Purchases
 
 * Record supplier purchases
 * Track cost price and quantity
 * Purchase history and supplier insights
 * Auto-calculated totals
 
-### 📉 Inventory Management
+### Inventory Management
 
 * Real-time stock tracking
 * Low stock and out-of-stock alerts
 * Visual stock indicators (progress bars)
 * Inventory movement timeline
 
-### 🚚 Supplier Management
+### Supplier Management
 
 * Add/edit/delete suppliers
 * Supplier performance tracking
 * Reliability and category classification
 * Detailed supplier profiles
 
-### 📈 Reports
+### Reports
 
 * Sales trend analysis
 * Category-wise revenue breakdown
 * Interactive charts using Chart.js
 * Report generation simulation
 
-### ⚙️ Settings
+### Settings
 
 * Store configuration (name, GST, currency)
 * Theme toggle (Light/Dark mode)
@@ -77,7 +77,7 @@ Built using **HTML, CSS, and Vanilla JavaScript**, the project focuses on combin
 
 ---
 
-## 🎨 UI & Design Highlights
+## UI & Design Highlights
 
 * Luxury-inspired color palette (Gold, Burgundy, Ivory)
 * Clean and modern dashboard layout
@@ -88,7 +88,7 @@ Built using **HTML, CSS, and Vanilla JavaScript**, the project focuses on combin
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
 * **Charts:** Chart.js
@@ -97,7 +97,7 @@ Built using **HTML, CSS, and Vanilla JavaScript**, the project focuses on combin
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 ├── index.html              # Login page
@@ -131,7 +131,7 @@ Built using **HTML, CSS, and Vanilla JavaScript**, the project focuses on combin
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 1. Clone the repository
 
@@ -151,7 +151,7 @@ No installation or dependencies required.
 
 ---
 
-## 📱 Responsiveness
+## Responsiveness
 
 The application is fully responsive and adapts to:
 
@@ -161,7 +161,7 @@ The application is fully responsive and adapts to:
 
 ---
 
-## 🎯 Project Objective
+## Project Objective
 
 This project was developed to simulate a **real-world jewellery store management system**, focusing on:
 
@@ -173,7 +173,7 @@ This project was developed to simulate a **real-world jewellery store management
 
 ---
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 * Backend integration (Node.js / Express / Oracle SQL)
 * Authentication system
@@ -184,7 +184,7 @@ This project was developed to simulate a **real-world jewellery store management
 
 ---
 
-## ⭐ Final Note
+## Final Note
 
 This project combines **functional depth** with **premium visual design**, making it suitable for:
 
