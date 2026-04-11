@@ -1,5 +1,5 @@
 'use strict';
-const { query } = require('../config/db');
+const { query } = require('../db');
 
 /**
  * Generates the next ID for a given entity by querying the current max.

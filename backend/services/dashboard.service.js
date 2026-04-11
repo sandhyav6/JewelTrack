@@ -1,5 +1,5 @@
 'use strict';
-const { query } = require('../config/db');
+const { query } = require('../db');
 
 /**
  * Dashboard summary statistics.

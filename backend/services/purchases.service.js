@@ -1,5 +1,5 @@
 'use strict';
-const { getConnection }  = require('../config/db');
+const { getConnection }  = require('../db');
 const { nextPurchaseId } = require('./idGenerator.service');
 const AppError           = require('../utils/errors');
 
