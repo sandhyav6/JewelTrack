@@ -98,7 +98,7 @@ async function savePurchase() {
       {
         itemId: item.value,
         quantity: parseInt(qty.value),
-        unitCost: parseFloat(cost.value)
+        costPrice: parseFloat(cost.value)
       }
     ]
   };
@@ -164,6 +164,7 @@ function renderTopSuppliers() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  initInternalPage();
   await loadPurchaseDropdowns();
   await loadPurchases();
 
