@@ -204,6 +204,7 @@ function resetCustomerForm() {
 
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
+  initInternalPage();
   loadCustomers();
 
   // Reset form when opening Add modal

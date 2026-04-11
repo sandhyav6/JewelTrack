@@ -284,6 +284,8 @@ function animateStats() {
 
 // ===== Initialize Dashboard =====
 document.addEventListener('DOMContentLoaded', async () => {
+  initInternalPage();
+
   // Update greeting with logged-in user's name
   const user = getCurrentUser();
   const greetingEl = document.getElementById('dashGreeting');

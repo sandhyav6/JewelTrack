@@ -12,7 +12,7 @@ async function initBilling() {
     fetchData('/api/items'),
     fetchData('/api/customers'),
     fetchData('/api/employees'),
-    fetchData('/api/bills/next-number')
+    fetchData('/api/billing/next-number')
   ]);
 
   if (items) availableItems = items;
@@ -36,7 +36,7 @@ async function initBilling() {
 
   if (employees) {
     document.getElementById('billEmployee').innerHTML = '<option value="">Select Billed By</option>' +
-      employees.map(e => `<option value="${e.EMPLOYEEID}">${e.FIRSTNAME} ${e.LASTNAME}</option>`).join('');
+      employees.map(e => `<option value="${e.EMPLOYEEID}">${e.FIRSTNAME}${e.LASTNAME ? ' ' + e.LASTNAME : ''}</option>`).join('');
   }
 
   document.getElementById('billCustomer').addEventListener('change', updatePreview);
@@ -198,7 +198,7 @@ async function generateBill() {
     items: billItems.map(i => ({ itemId: i.id, quantity: i.qty, unitPrice: i.price }))
   };
 
-  const res = await fetchData('/api/bills', {
+  const res = await fetchData('/api/billing', {
     method: 'POST',
     body: JSON.stringify(payload)
   });
@@ -248,4 +248,7 @@ function clearBill() {
 }
 
 // ===== Initialize =====
-document.addEventListener('DOMContentLoaded', initBilling);
+document.addEventListener('DOMContentLoaded', () => {
+  initInternalPage();
+  initBilling();
+});
