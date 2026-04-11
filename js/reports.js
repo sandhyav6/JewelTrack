@@ -75,4 +75,7 @@ function generateReport() {
   showToast('success', 'Report Generated', 'Report data has been refreshed for the selected date range.');
 }
 
-document.addEventListener('DOMContentLoaded', initReportCharts);
+document.addEventListener('DOMContentLoaded', () => {
+  initInternalPage();
+  initReportCharts();
+});

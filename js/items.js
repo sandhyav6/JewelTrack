@@ -201,7 +201,7 @@ async function saveItem() {
     categoryId: category.value,
     material: material.value,
     weight: parseFloat(document.getElementById('itemWeight').value) || null,
-    basePrice: parseFloat(price.value),
+    price: parseFloat(price.value),
     stock: parseInt(stock.value),
     supplierId: document.getElementById('itemSupplier').value || null,
     description: document.getElementById('itemDesc').value.trim() || null,
@@ -307,6 +307,7 @@ function resetItemForm() {
 
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', async () => {
+  initInternalPage();
   await loadDropdowns();
   await loadItems();
 });

@@ -1,5 +1,5 @@
 'use strict';
-const { query } = require('../config/db');
+const { query } = require('../db');
 
 /**
  * Sales trend — daily totals for the last 30 days.

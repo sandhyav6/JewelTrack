@@ -134,5 +134,6 @@ function searchInventory() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initInternalPage();
   loadInventoryData();
 });

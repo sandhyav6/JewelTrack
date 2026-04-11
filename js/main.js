@@ -294,7 +294,7 @@ async function fetchData(url, options = {}) {
     return result.data;
   } catch (error) {
     console.error('API Error:', error);
-    showToast('error', 'Server Error', 'Failed to connect to server.');
+    showToast('error', 'Request Failed', error.message || 'Failed to connect to server.');
     return null;
   }
 }
@@ -306,6 +306,7 @@ function formatCurrency(amount) {
 
 // ===== Utility: Format Date =====
 function formatDate(dateStr) {
+  if (!dateStr || dateStr === null) return '-';
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 }
@@ -334,6 +335,20 @@ const JMS_CREDENTIALS = [
     role: 'Staff',
     name: 'Rahul M.',
     avatar: 'RM'
+  },
+  {
+    email: 'preethi@jeweltrack.com',
+    password: 'staff123',
+    role: 'Staff',
+    name: 'Preethi K.',
+    avatar: 'PK'
+  },
+  {
+    email: 'arun@jeweltrack.com',
+    password: 'staff123',
+    role: 'Staff',
+    name: 'Arun S.',
+    avatar: 'AS'
   }
 ];
 
@@ -397,7 +412,8 @@ function getRolePermissions(role) {
       'customers.html',
       'items.html',
       'billing.html',
-      'inventory.html'
+      'inventory.html',
+      'settings.html'
     ]
   };
   return permissions[role] || [];
@@ -629,16 +645,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   // Internal pages call initInternalPage() from their own page script.
   // Login page (index.html) only needs initTheme.
-  // If sidebar exists, this is an internal page — initialize shared components.
-  if (document.querySelector('.sidebar')) {
-    requireAuth();
-    enforcePageAccess();
-    initSidebar();
-    initActiveNav();
-    initProfileDropdown();
-    initDateTime();
-    applyUserProfileToUI();
-    applyRoleBasedNavigation();
-    applyRoleBasedActionRestrictions();
-  }
 });

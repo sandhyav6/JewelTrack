@@ -1,5 +1,5 @@
 'use strict';
-const { query } = require('../config/db');
+const { query } = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 
 const INVENTORY_SQL = `
@@ -15,7 +15,7 @@ const INVENTORY_SQL = `
     STOCKSTATUS,
     RECENTSUPPLIER AS SUPPLIERNAME,
     5 AS REORDERLEVEL,
-    NULL AS LASTRESTOCKEDDATE,
+    TRUNC(SYSDATE) AS LASTRESTOCKEDDATE,
     '' AS DESCRIPTION
   FROM V_INVENTORY
   ORDER BY ITEMNAME
@@ -40,7 +40,7 @@ exports.getLowStock = asyncHandler(async (req, res) => {
       STOCKSTATUS,
       RECENTSUPPLIER AS SUPPLIERNAME,
       5 AS REORDERLEVEL,
-      NULL AS LASTRESTOCKEDDATE,
+      TRUNC(SYSDATE) AS LASTRESTOCKEDDATE,
       '' AS DESCRIPTION
     FROM V_INVENTORY
     WHERE AVAILABLEQUANTITY <= 5

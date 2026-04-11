@@ -9,6 +9,45 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 26px;
+      cursor: pointer;
+      transition: background var(--transition-base);
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform var(--transition-base);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--gold);
+    }
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+    }
+  </style>
 </head>
 <body>
   <div class="app-wrapper">
@@ -29,9 +68,9 @@
         <div class="nav-section-label">Operations</div>
         <a href="inventory.html" class="nav-item active" data-page="inventory.html"><i class="fa-solid fa-warehouse"></i> Inventory</a>
         <a href="reports.html" class="nav-item" data-page="reports.html"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+        <a href="settings.html" class="nav-item" data-page="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
       </nav>
       <div class="sidebar-footer">
-        <a href="settings.html" class="nav-item" data-page="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
         <a href="#" onclick="logoutUser()" class="nav-item"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
       </div>
     </aside>
@@ -50,6 +89,13 @@
           <div class="navbar-search"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search anything..."></div>
           <span class="navbar-date" id="navDate"></span>
           <button class="navbar-icon-btn"><i class="fa-solid fa-bell"></i><span class="notification-badge"></span></button>
+          <div style="display:flex;align-items:center;gap:8px;margin-right:16px;">
+            <span style="font-size:12px;color:var(--text-muted);">Dark Mode</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="navbarDarkModeToggle" onchange="toggleTheme()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
           <div class="navbar-profile">
             <div class="profile-avatar" id="profileAvatar">SV</div>
             <div class="profile-info"><span class="name" id="profileName">Sandhya V.</span><span class="role" id="profileRole">Admin</span></div>
@@ -160,5 +206,9 @@
   <div class="toast-container"></div>
   <script src="js/main.js"></script>
   <script src="js/inventory.js"></script>
+  <script>
+    // Initialize navbar dark mode toggle
+    document.getElementById('navbarDarkModeToggle').checked = localStorage.getItem('jms-theme') === 'dark';
+  </script>
 </body>
 </html>

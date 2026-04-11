@@ -169,4 +169,7 @@ function openAddSupplier() {
   openModal('addSupplierModal');
 }
 
-document.addEventListener('DOMContentLoaded', () => { loadSuppliers(); });
+document.addEventListener('DOMContentLoaded', () => {
+  initInternalPage();
+  loadSuppliers();
+});
