@@ -1,5 +1,5 @@
 'use strict';
-const { query } = require('../config/db');
+const { query } = require('../db');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/errors');
 const { validateItem } = require('../utils/validators');
@@ -145,6 +145,16 @@ exports.update = asyncHandler(async (req, res) => {
 });
 
 exports.remove = asyncHandler(async (req, res) => {
+  // Check if item is referenced in any purchases
+  const checkResult = await query(
+    'SELECT COUNT(*) AS count FROM PURCHASE_ITEM WHERE ITEMID = :id',
+    { id: req.params.id }
+  );
+
+  if (checkResult.rows[0].COUNT > 0) {
+    throw new AppError('Cannot delete item that has been purchased.', 400);
+  }
+
   const result = await query(
     'DELETE FROM ITEM WHERE ITEMID = :id',
     { id: req.params.id },

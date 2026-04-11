@@ -1,5 +1,5 @@
 'use strict';
-const { query }           = require('../config/db');
+const { query }           = require('../db');
 const asyncHandler        = require('../utils/asyncHandler');
 const AppError            = require('../utils/errors');
 const { validateCustomer } = require('../utils/validators');
@@ -32,21 +32,34 @@ exports.create = asyncHandler(async (req, res) => {
 
 exports.update = asyncHandler(async (req, res) => {
   const { name, phone } = validateCustomer(req.body);
-  const result = await query(
-    'UPDATE CUSTOMER SET CUSTOMERNAME = :name, PHONE = :phone WHERE CUSTOMERID = :id',
-    { name, phone, id: req.params.id },
-    { autoCommit: true }
-  );
-  if (result.rowsAffected === 0) throw new AppError('Customer not found.', 404);
-  res.json({ success: true, data: { id: req.params.id, name, phone } });
+  try {
+    const result = await query(
+      'UPDATE CUSTOMER SET CUSTOMERNAME = :name, PHONE = :phone WHERE CUSTOMERID = :id',
+      { name, phone, id: req.params.id },
+      { autoCommit: true }
+    );
+    if (result.rowsAffected === 0) throw new AppError('Customer not found.', 404);
+    res.json({ success: true, data: { id: req.params.id, name, phone } });
+  } catch (err) {
+    if (err.statusCode) throw err;
+    throw new AppError(err.message || 'Failed to update customer.', 400);
+  }
 });
 
 exports.remove = asyncHandler(async (req, res) => {
-  const result = await query(
-    'DELETE FROM CUSTOMER WHERE CUSTOMERID = :id',
-    { id: req.params.id },
-    { autoCommit: true }
-  );
-  if (result.rowsAffected === 0) throw new AppError('Customer not found.', 404);
-  res.json({ success: true, message: 'Customer deleted.' });
+  try {
+    const result = await query(
+      'DELETE FROM CUSTOMER WHERE CUSTOMERID = :id',
+      { id: req.params.id },
+      { autoCommit: true }
+    );
+    if (result.rowsAffected === 0) throw new AppError('Customer not found.', 404);
+    res.json({ success: true, message: 'Customer deleted.' });
+  } catch (err) {
+    if (err.statusCode) throw err;
+    if (err.message && err.message.includes('ORA-02292')) {
+      throw new AppError('Cannot delete customer with existing bills or transactions.', 400);
+    }
+    throw new AppError('Failed to delete customer.', 400);
+  }
 });

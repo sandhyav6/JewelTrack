@@ -1,5 +1,5 @@
 'use strict';
-const { query }          = require('../config/db');
+const { query }          = require('../db');
 const asyncHandler       = require('../utils/asyncHandler');
 const AppError           = require('../utils/errors');
 const { validateBill }   = require('../utils/validators');

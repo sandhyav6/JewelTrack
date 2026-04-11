@@ -1,5 +1,5 @@
 'use strict';
-const { query }             = require('../config/db');
+const { query }             = require('../db');
 const asyncHandler          = require('../utils/asyncHandler');
 const AppError              = require('../utils/errors');
 const { validateSupplier }  = require('../utils/validators');
@@ -50,6 +50,15 @@ exports.update = asyncHandler(async (req, res) => {
 });
 
 exports.remove = asyncHandler(async (req, res) => {
+  // Check if supplier has any purchases
+  const checkResult = await query(
+    'SELECT COUNT(*) as count FROM PURCHASE WHERE SUPPLIERID = :id',
+    { id: req.params.id }
+  );
+  if (checkResult.rows[0].COUNT > 0) {
+    throw new AppError('Cannot delete supplier with existing purchases. Remove all associated purchases first.', 400);
+  }
+
   const result = await query(
     'DELETE FROM SUPPLIER WHERE SUPPLIERID = :id',
     { id: req.params.id },
